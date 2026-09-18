@@ -11,8 +11,8 @@ results by default.
 ## Review
 
 Open `regular-season-mockup.html` directly in a browser. It has no build step
-or external JavaScript dependencies. The results toggle demonstrates the
-intended spoiler-control behavior.
+or external JavaScript dependencies. The mockup centers Week 7, lets you
+expand Week 6 or Week 8, and reveals scores one game at a time.
 
 The mockup uses sample data and preview logo URLs. It is not yet connected to
 the live nflverse data source.

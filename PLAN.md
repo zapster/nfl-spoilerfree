@@ -107,11 +107,15 @@ The browser is responsible for:
 - Fetching and normalizing team metadata
 - Calculating regular-season standings
 - Switching between schedule, standings, and playoff views
-- Hiding or revealing scores
+- Revealing individual game scores
 - Refreshing expired data
 
-The results toggle must not trigger a data request. It only changes how
-already-loaded scores are rendered.
+Revealing a score must not trigger a data request. It only changes how the
+already-loaded score for that game is rendered.
+
+There must be no whole-week or whole-page `Show results` control. Each
+completed game exposes its own reveal button in the centered score position.
+Reveal state should reset on page load initially rather than being persisted.
 
 Scores are intentionally available in browser memory and persistent storage.
 The spoiler feature prevents accidental display, not deliberate inspection
@@ -142,8 +146,8 @@ file is downloaded.
 ### Persistent Browser Storage
 
 Use `IndexedDB` as the primary persistent cache. `localStorage` is acceptable
-for small preferences such as the result-visibility setting, but is
-synchronous and less suitable for structured game data.
+for small UI preferences, but is synchronous and less suitable for structured
+game data. Per-game score reveal state should not be persisted initially.
 
 Each cache entry should include:
 
@@ -319,7 +323,7 @@ Shared behavior should include:
 
 - Season selection
 - Data loading and normalization
-- Result visibility preference
+- Individual game-result reveal state
 - Navigation and application shell
 - Responsive layout primitives
 
@@ -328,15 +332,19 @@ view components are preferred so shared behavior is not duplicated.
 
 ## Regular-Season Schedule View
 
-The schedule subview displays regular-season games grouped by weeks 1
-through 18.
+The schedule subview is an endless week stream. It initially centers the
+current week and uses expand controls above and below the visible content to
+uncover the previous or following week without leaving the page.
+
+The first mockup centers Week 7 and includes Week 6 and Week 8 as examples of
+the adjacent-week expansion behavior.
 
 It should show:
 
 - Week number
 - Game date and time
 - Away and home teams
-- Scores when results are enabled
+- A centered per-game result reveal button
 - Scheduled/final state
 
 Postseason games must not appear in the regular-season schedule.
@@ -501,6 +509,8 @@ Acceptance criteria:
 Scope:
 
 - Display games grouped by NFL week.
+- Center the current week in an endless week stream.
+- Add controls above and below the stream to uncover adjacent weeks.
 - Display matchup, date, and time information.
 - Add the regular-season schedule and standings subviews.
 - Group standings under AFC/NFC conferences and their divisions.
@@ -514,6 +524,9 @@ Scope:
 Acceptance criteria:
 
 - All regular-season games are reachable by week.
+- The previous week can be uncovered above the current week.
+- The following week can be uncovered below the current week.
+- Expanding a week does not navigate away from the current page.
 - All playoff games are reachable by playoff round.
 - Users can switch between the regular-season schedule and standings views.
 - Standings display teams under the correct conference and division.
@@ -529,20 +542,21 @@ Acceptance criteria:
 
 Scope:
 
-- Add a `Show results` toggle.
+- Add a reveal button for each completed game.
 - Hide scores in the presentation layer only.
 - Keep scores in the loaded game data.
-- Decide whether results are hidden by default.
-- Persist the preference locally.
+- Keep every score hidden by default.
+- Do not add a whole-week or whole-page reveal control.
 
 Acceptance criteria:
 
-- Scores appear when results are enabled.
-- Scores are not rendered when results are disabled.
+- Clicking one game's centered dash reveals only that game's score.
+- Other completed-game scores remain hidden after a game is revealed.
+- Scores remain hidden by default on a new page load.
 - Hidden scores cannot be inferred from accessibility text or alternate
   labels.
 - Scheduled games never display fabricated scores.
-- The control is keyboard-accessible and clearly labeled.
+- Each reveal button is keyboard-accessible and clearly labeled.
 
 ### Milestone 5: Browser Cache and Refresh Behavior
 
@@ -581,12 +595,14 @@ Automated tests should cover:
 - Final-game status handling.
 - Regular-season and postseason grouping.
 - Week ordering.
+- Adjacent-week expansion above and below the current week.
 - Standings record calculation from completed games.
 - Conference and division grouping.
 - Exclusion of scheduled and postseason games from regular-season standings.
 - Standings ordering according to the selected tie-breaking policy.
-- Score visibility when results are enabled.
-- Score omission when results are disabled.
+- Per-game score reveal behavior.
+- Isolation between revealed and unrevealed games.
+- Reset of reveal state on page load.
 - Scheduled games with no scores.
 - Empty or invalid dataset handling.
 

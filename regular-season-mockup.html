@@ -125,63 +125,6 @@
       line-height: 1.55;
     }
 
-    .results-control {
-      display: flex;
-      align-items: center;
-      flex: 0 0 auto;
-      gap: 12px;
-      padding: 12px 14px;
-      color: var(--ink);
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: 0 8px 20px rgba(26, 37, 52, .04);
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .switch {
-      position: relative;
-      width: 38px;
-      height: 22px;
-      flex: 0 0 auto;
-      background: #c9c7c0;
-      border-radius: 999px;
-      transition: background .2s ease;
-    }
-
-    .switch::after {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 16px;
-      height: 16px;
-      background: white;
-      border-radius: 50%;
-      content: "";
-      transition: transform .2s ease;
-    }
-
-    .results-control input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .results-control input:checked + .switch {
-      background: var(--green);
-    }
-
-    .results-control input:checked + .switch::after {
-      transform: translateX(16px);
-    }
-
-    .results-control input:focus-visible + .switch {
-      outline: 3px solid rgba(228, 87, 61, .35);
-      outline-offset: 3px;
-    }
-
     .view-nav {
       display: flex;
       align-items: center;
@@ -210,7 +153,6 @@
     .week-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 20px;
       margin-bottom: 16px;
     }
@@ -233,25 +175,33 @@
       font-weight: 650;
     }
 
-    .week-nav {
+    .week-expander {
       display: flex;
-      gap: 8px;
+      justify-content: center;
+      margin: 12px 0 24px;
     }
 
-    .week-nav button {
+    .expand-week {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 8px 12px;
-      color: var(--muted);
+      color: var(--red);
       background: transparent;
-      border: 1px solid var(--line);
-      border-radius: 9px;
+      border: 1px dashed #d6b5aa;
+      border-radius: 999px;
       cursor: pointer;
       font-size: 12px;
       font-weight: 750;
     }
 
-    .week-nav button:hover {
-      color: var(--ink);
+    .expand-week:hover {
       background: var(--card);
+    }
+
+    .week[hidden],
+    .expand-week[hidden] {
+      display: none;
     }
 
     .games {
@@ -348,11 +298,41 @@
     }
 
     .game-score {
+      min-width: 68px;
+      min-height: 44px;
+      padding: 2px 6px;
       color: var(--ink);
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
       text-align: center;
       font-size: 29px;
       font-weight: 850;
       white-space: nowrap;
+    }
+
+    .game-score:hover {
+      background: #f0ede5;
+    }
+
+    .game-score:focus-visible {
+      outline: 3px solid rgba(228, 87, 61, .35);
+      outline-offset: 3px;
+    }
+
+    .game-score.is-revealed,
+    .game-score:disabled {
+      cursor: default;
+    }
+
+    .game-score.is-revealed:hover,
+    .game-score:disabled:hover {
+      background: transparent;
+    }
+
+    .game-score:disabled {
+      opacity: 1;
     }
 
     .sample-note {
@@ -391,10 +371,6 @@
         margin-bottom: 28px;
       }
 
-      .results-control {
-        margin-top: 22px;
-      }
-
       .week-header {
         align-items: flex-start;
       }
@@ -429,6 +405,7 @@
       }
 
       .game-score {
+        min-width: 48px;
         font-size: 26px;
       }
 
@@ -465,14 +442,8 @@
       <div>
         <p class="eyebrow">Regular season</p>
         <h1 id="page-title">The games, without the noise.</h1>
-        <p class="intro-copy">A clean weekly view of the NFL schedule. Results stay hidden until you choose to see them.</p>
+        <p class="intro-copy">A clean weekly view of the NFL schedule. Click any centered dash to reveal only that game's result.</p>
       </div>
-
-      <label class="results-control">
-        <input id="results-toggle" type="checkbox">
-        <span class="switch" aria-hidden="true"></span>
-        <span>Show results</span>
-      </label>
     </section>
 
     <nav class="view-nav" aria-label="Season views">
@@ -481,23 +452,63 @@
     </nav>
 
     <section id="schedule" aria-labelledby="week-heading">
-      <div class="week-header">
-        <div class="week-title">
-          <h2 id="week-heading">Week 7</h2>
-          <span class="week-date">October 16 - 20</span>
+      <div class="week-stream" id="week-stream">
+        <div class="week-expander">
+          <button class="expand-week" type="button" data-reveal-week="week-6" aria-controls="week-6" aria-expanded="false">&#8595; Expand Week 6</button>
         </div>
-        <div class="week-nav" aria-label="Change week">
-          <button type="button" aria-label="Previous week">Prev</button>
-          <button type="button" aria-label="Next week">Next</button>
-        </div>
-      </div>
 
-      <div class="games" id="games-list">
+        <section class="week" id="week-6" aria-labelledby="week-6-heading" hidden>
+          <div class="week-header">
+            <div class="week-title">
+              <h2 id="week-6-heading">Week 6</h2>
+              <span class="week-date">October 9 - 13</span>
+            </div>
+          </div>
+
+          <div class="games">
+            <article class="game">
+              <div class="game-time"><strong>Final</strong>Sun<br>1:00 PM</div>
+              <div class="matchup">
+                <div class="team"><span class="team-logo" style="--badge-color: #008e97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="" aria-hidden="true"><span class="team-logo-fallback">MIA</span></span><span>Dolphins</span></div>
+                <button class="game-score" type="button" data-score="23 - 20" aria-label="Reveal score">-</button>
+                <div class="team home"><span>Browns</span><span class="team-logo" style="--badge-color: #311d00"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="" aria-hidden="true"><span class="team-logo-fallback">CLE</span></span></div>
+              </div>
+            </article>
+
+            <article class="game">
+              <div class="game-time"><strong>Final</strong>Sun<br>4:05 PM</div>
+              <div class="matchup">
+                <div class="team"><span class="team-logo" style="--badge-color: #004c54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="" aria-hidden="true"><span class="team-logo-fallback">PHI</span></span><span>Eagles</span></div>
+                <button class="game-score" type="button" data-score="28 - 17" aria-label="Reveal score">-</button>
+                <div class="team home"><span>Giants</span><span class="team-logo" style="--badge-color: #0b2265"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png" alt="" aria-hidden="true"><span class="team-logo-fallback">NYG</span></span></div>
+              </div>
+            </article>
+
+            <article class="game">
+              <div class="game-time"><strong>Final</strong>Mon<br>8:15 PM</div>
+              <div class="matchup">
+                <div class="team"><span class="team-logo" style="--badge-color: #241773"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/bal.png" alt="" aria-hidden="true"><span class="team-logo-fallback">BAL</span></span><span>Ravens</span></div>
+                <button class="game-score" type="button" data-score="30 - 24" aria-label="Reveal score">-</button>
+                <div class="team home"><span>Bengals</span><span class="team-logo" style="--badge-color: #fb4f14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cin.png" alt="" aria-hidden="true"><span class="team-logo-fallback">CIN</span></span></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="week" id="week-7" aria-labelledby="week-heading">
+          <div class="week-header">
+            <div class="week-title">
+              <h2 id="week-heading">Week 7</h2>
+              <span class="week-date">October 16 - 20</span>
+            </div>
+          </div>
+
+          <div class="games" id="games-list">
         <article class="game">
           <div class="game-time"><strong>Final</strong>Thu<br>8:15 PM</div>
           <div class="matchup">
             <div class="team"><span class="team-logo" style="--badge-color: #4f2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="" aria-hidden="true"><span class="team-logo-fallback">MIN</span></span><span>Vikings</span></div>
-            <div class="game-score" data-score="20 - 17" aria-label="Scores hidden">-</div>
+            <button class="game-score" type="button" data-score="20 - 17" aria-label="Reveal score">-</button>
             <div class="team home"><span>Chargers</span><span class="team-logo" style="--badge-color: #0080c6"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="" aria-hidden="true"><span class="team-logo-fallback">LAC</span></span></div>
           </div>
         </article>
@@ -506,7 +517,7 @@
           <div class="game-time"><strong>Final</strong>Sun<br>1:00 PM</div>
           <div class="matchup">
             <div class="team"><span class="team-logo" style="--badge-color: #00338d"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="" aria-hidden="true"><span class="team-logo-fallback">BUF</span></span><span>Bills</span></div>
-            <div class="game-score" data-score="24 - 21" aria-label="Scores hidden">-</div>
+            <button class="game-score" type="button" data-score="24 - 21" aria-label="Reveal score">-</button>
             <div class="team home"><span>Patriots</span><span class="team-logo" style="--badge-color: #c60c30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ne.png" alt="" aria-hidden="true"><span class="team-logo-fallback">NE</span></span></div>
           </div>
         </article>
@@ -515,7 +526,7 @@
           <div class="game-time"><strong>Final</strong>Sun<br>4:25 PM</div>
           <div class="matchup">
             <div class="team"><span class="team-logo" style="--badge-color: #003594"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/dal.png" alt="" aria-hidden="true"><span class="team-logo-fallback">DAL</span></span><span>Cowboys</span></div>
-            <div class="game-score" data-score="27 - 24" aria-label="Scores hidden">-</div>
+            <button class="game-score" type="button" data-score="27 - 24" aria-label="Reveal score">-</button>
             <div class="team home"><span>Lions</span><span class="team-logo" style="--badge-color: #0076b6"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/det.png" alt="" aria-hidden="true"><span class="team-logo-fallback">DET</span></span></div>
           </div>
         </article>
@@ -524,7 +535,7 @@
           <div class="game-time"><strong style="color: var(--red)">Scheduled</strong>Sun<br>8:20 PM</div>
           <div class="matchup">
             <div class="team"><span class="team-logo" style="--badge-color: #125740"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png" alt="" aria-hidden="true"><span class="team-logo-fallback">NYJ</span></span><span>Jets</span></div>
-            <div class="game-score" data-score="" aria-label="Not played">-</div>
+            <button class="game-score" type="button" data-score="" aria-label="Game not played" disabled>-</button>
             <div class="team home"><span>Steelers</span><span class="team-logo" style="--badge-color: #ffb612; --badge-text: #18212f"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="" aria-hidden="true"><span class="team-logo-fallback">PIT</span></span></div>
           </div>
         </article>
@@ -533,13 +544,57 @@
           <div class="game-time"><strong>Final</strong>Mon<br>8:15 PM</div>
           <div class="matchup">
             <div class="team"><span class="team-logo" style="--badge-color: #e31837"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/kc.png" alt="" aria-hidden="true"><span class="team-logo-fallback">KC</span></span><span>Chiefs</span></div>
-            <div class="game-score" data-score="31 - 27" aria-label="Scores hidden">-</div>
+            <button class="game-score" type="button" data-score="31 - 27" aria-label="Reveal score">-</button>
             <div class="team home"><span>Broncos</span><span class="team-logo" style="--badge-color: #fb4f14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/den.png" alt="" aria-hidden="true"><span class="team-logo-fallback">DEN</span></span></div>
           </div>
         </article>
-      </div>
+          </div>
+        </section>
 
-      <p class="sample-note">Sample data for layout review. Last refreshed today at 9:00 AM.</p>
+        <section class="week" id="week-8" aria-labelledby="week-8-heading" hidden>
+          <div class="week-header">
+            <div class="week-title">
+              <h2 id="week-8-heading">Week 8</h2>
+              <span class="week-date">October 23 - 27</span>
+            </div>
+          </div>
+
+          <div class="games">
+            <article class="game">
+              <div class="game-time"><strong>Final</strong>Thu<br>8:15 PM</div>
+              <div class="matchup">
+                <div class="team"><span class="team-logo" style="--badge-color: #203731"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" alt="" aria-hidden="true"><span class="team-logo-fallback">GB</span></span><span>Packers</span></div>
+                <button class="game-score" type="button" data-score="27 - 23" aria-label="Reveal score">-</button>
+                <div class="team home"><span>Cardinals</span><span class="team-logo" style="--badge-color: #97233f"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ari.png" alt="" aria-hidden="true"><span class="team-logo-fallback">ARI</span></span></div>
+              </div>
+            </article>
+
+            <article class="game">
+              <div class="game-time"><strong>Final</strong>Sun<br>1:00 PM</div>
+              <div class="matchup">
+                <div class="team"><span class="team-logo" style="--badge-color: #0085ca"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/car.png" alt="" aria-hidden="true"><span class="team-logo-fallback">CAR</span></span><span>Panthers</span></div>
+                <button class="game-score" type="button" data-score="21 - 18" aria-label="Reveal score">-</button>
+                <div class="team home"><span>Falcons</span><span class="team-logo" style="--badge-color: #a71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="" aria-hidden="true"><span class="team-logo-fallback">ATL</span></span></div>
+              </div>
+            </article>
+
+            <article class="game">
+              <div class="game-time"><strong>Final</strong>Sun<br>4:25 PM</div>
+              <div class="matchup">
+                <div class="team"><span class="team-logo" style="--badge-color: #aa0000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/sf.png" alt="" aria-hidden="true"><span class="team-logo-fallback">SF</span></span><span>49ers</span></div>
+                <button class="game-score" type="button" data-score="26 - 20" aria-label="Reveal score">-</button>
+                <div class="team home"><span>Seahawks</span><span class="team-logo" style="--badge-color: #69be28; --badge-text: #18212f"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/sea.png" alt="" aria-hidden="true"><span class="team-logo-fallback">SEA</span></span></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <div class="week-expander">
+          <button class="expand-week" type="button" data-reveal-week="week-8" aria-controls="week-8" aria-expanded="false">&#8595; Expand Week 8</button>
+        </div>
+
+        <p class="sample-note">Sample data for layout review. Last refreshed today at 9:00 AM.</p>
+      </div>
     </section>
   </main>
 
@@ -553,13 +608,23 @@
       logo.addEventListener('error', () => logo.remove());
     });
 
-    const toggle = document.querySelector('#results-toggle');
-    const gamesList = document.querySelector('#games-list');
+    document.querySelectorAll('.expand-week').forEach((button) => {
+      button.addEventListener('click', () => {
+        const week = document.getElementById(button.dataset.revealWeek);
+        if (!week) return;
 
-    toggle.addEventListener('change', () => {
-      gamesList.querySelectorAll('.game-score').forEach((score) => {
-        score.textContent = toggle.checked ? (score.dataset.score || '-') : '-';
-        score.setAttribute('aria-label', toggle.checked ? (score.dataset.score || 'Not played') : 'Scores hidden');
+        week.hidden = false;
+        button.setAttribute('aria-expanded', 'true');
+        button.hidden = true;
+      });
+    });
+
+    document.querySelectorAll('.game-score:not(:disabled)').forEach((score) => {
+      score.addEventListener('click', () => {
+        score.textContent = score.dataset.score;
+        score.classList.add('is-revealed');
+        score.setAttribute('aria-label', `Score: ${score.dataset.score}`);
+        score.disabled = true;
       });
     });
   </script>
