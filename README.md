@@ -6,6 +6,7 @@ results by default.
 ## Contents
 
 - `PLAN.md` - product and implementation plan
+- `DECISIONS.md` - durable product and architecture decisions
 - `regular-season-mockup.html` - standalone schedule-view mockup
 
 ## Review
