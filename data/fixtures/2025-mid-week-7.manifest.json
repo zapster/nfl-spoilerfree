@@ -1,0 +1,68 @@
+{
+  "fixture": "2025-mid-week-7",
+  "generatedAt": "2026-09-19T10:23:38.083543+00:00",
+  "snapshotCutoff": "2025-10-17T00:00:00-04:00",
+  "timeZone": "America/New_York",
+  "season": 2025,
+  "includedGameType": "REG",
+  "postseasonIncluded": false,
+  "sourceFiles": {
+    "games.csv": {
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv",
+      "sha256": "ec4465d8d6c13f3ba62a5978f0a6177b1deef6af938076be2cc52741bf9d1b8c"
+    },
+    "teams_colors_logos.csv": {
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/teams/teams_colors_logos.csv",
+      "sha256": "4eab559fcf89cb4eaf61cb63a88abc47b01b6c9049187c59f3efe95888c3d048"
+    }
+  },
+  "generatedFiles": {
+    "games.csv": "9521243eb819714618720557acff96df26c41a591a6d9c24153b385eabb80351",
+    "teams_colors_logos.csv": "3a57c565451a5736cc94f7ab2f63f4067bec55ecbe50cd0f248f8e03c05f4078"
+  },
+  "counts": {
+    "regularSeasonGames": 272,
+    "completedGames": 94,
+    "scheduledGames": 178,
+    "teams": 32
+  },
+  "teams": [
+    "ARI",
+    "ATL",
+    "BAL",
+    "BUF",
+    "CAR",
+    "CHI",
+    "CIN",
+    "CLE",
+    "DAL",
+    "DEN",
+    "DET",
+    "GB",
+    "HOU",
+    "IND",
+    "JAX",
+    "KC",
+    "LA",
+    "LAC",
+    "LV",
+    "MIA",
+    "MIN",
+    "NE",
+    "NO",
+    "NYG",
+    "NYJ",
+    "PHI",
+    "PIT",
+    "SEA",
+    "SF",
+    "TB",
+    "TEN",
+    "WAS"
+  ],
+  "masking": {
+    "description": "Rows after the cutoff retain schedule fields and have result-bearing fields blanked.",
+    "scoresRetainedThroughCutoff": true,
+    "externalLogos": true
+  }
+}
