@@ -8,6 +8,7 @@ results by default.
 - `PLAN.md` - product and implementation plan
 - `DECISIONS.md` - durable product and architecture decisions
 - `regular-season-mockup.html` - standalone schedule-view mockup
+- `index.html`, `app.js`, `styles.css` - initial data-backed site
 - `data/fixtures/2025-mid-week-7/` - source-compatible test resources
 - `scripts/prepare_mid_week7_fixture.py` - regenerate the test snapshot
 
@@ -19,6 +20,11 @@ expand Week 6 or Week 8, and reveals scores one game at a time.
 
 The mockup uses sample data and preview logo URLs. It is not yet connected to
 the live nflverse data source.
+
+The initial site fetches the two configured CSV resources directly, normalizes
+them in memory, and renders the current week and spoiler-safe standings. It
+does not cache data yet. Scores remain hidden until their individual reveal
+buttons are used; standings count only revealed results.
 
 ## Local Website and NFLverse Fixture
 

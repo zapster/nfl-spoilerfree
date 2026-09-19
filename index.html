@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Browse NFL games without revealing results by default.">
+  <title>NFL Spoiler-Free</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell" id="app">
+    <nav class="view-nav" aria-label="Season views">
+      <div class="view-tabs" role="tablist" aria-label="Season view">
+        <button class="view-tab is-active" type="button" role="tab" data-view="schedule" aria-selected="true">Schedule</button>
+        <button class="view-tab" type="button" role="tab" data-view="standings" aria-selected="false">Standings</button>
+      </div>
+      <label class="season-picker">
+        <span>Season</span>
+        <select id="season-select" aria-label="Season">
+          <option value="2025" selected>2025</option>
+        </select>
+      </label>
+    </nav>
+
+    <div id="loading" class="loading-state" role="status">Loading NFL data...</div>
+    <div id="error" class="error-state" role="alert" hidden></div>
+    <div id="content" hidden></div>
+  </main>
+
+  <footer class="site-footer">
+    <span>Scores are hidden by default</span>
+    <span>Data loaded from NFLverse</span>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
