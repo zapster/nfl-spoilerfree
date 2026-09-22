@@ -114,10 +114,11 @@ Revealing a score must not trigger a data request. It only changes how the
 already-loaded score for that game is rendered.
 
 A per-week `Reveal all` control may reveal every completed result in that week;
-when all results are already visible, it becomes `Hide all`. These controls
-must not reveal scheduled games or results in another week. Each completed
-game also exposes its own centered reveal/hide toggle. Reveal state should
-reset on page load initially rather than being persisted.
+when all results are already visible, it remains labeled `All revealed` and is
+still clickable to hide them. These controls must not reveal scheduled games or
+results in another week. Each completed game also exposes its own centered
+reveal/hide toggle. Reveal state should reset on page load initially rather than
+being persisted.
 
 Scores are intentionally available in browser memory and persistent storage.
 The spoiler feature prevents accidental display, not deliberate inspection
@@ -556,7 +557,8 @@ Acceptance criteria:
 - Clicking one game's centered dash reveals only that game's score.
 - Clicking a revealed score hides that game's score again.
 - Other completed-game scores remain hidden after an individual game is revealed.
-- `Reveal all` and `Hide all` affect only completed games in their week.
+- `Reveal all` and the clickable `All revealed` state affect only completed
+  games in their week.
 - Scores remain hidden by default on a new page load.
 - Hidden scores cannot be inferred from accessibility text or alternate
   labels.

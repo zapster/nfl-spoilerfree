@@ -264,8 +264,15 @@ function scheduleView() {
       <div class="games"></div>
     `;
     const uncoverAll = week.querySelector(".uncover-all");
-    uncoverAll.textContent = remainingResults.length ? "Reveal all" : completedGames.length ? "Hide all" : "No results";
+    const allRevealed = completedGames.length > 0 && remainingResults.length === 0;
+    uncoverAll.textContent = remainingResults.length ? "Reveal all" : completedGames.length ? "All revealed" : "No results";
     uncoverAll.disabled = completedGames.length === 0;
+    uncoverAll.title = !completedGames.length
+      ? "No completed scores are available in this week"
+      : allRevealed
+        ? "Click to hide all revealed scores in this week"
+        : "Reveal all completed scores in this week";
+    uncoverAll.setAttribute("aria-label", uncoverAll.title);
     uncoverAll.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -355,6 +362,8 @@ function streakLabel(team) {
 
 function teamStandingElement(team, index) {
   const row = document.createElement("tr");
+  const hasUnrevealedResults = team.history.some(({ result }) => result === null);
+  if (hasUnrevealedResults) row.classList.add("has-unrevealed");
   const teamCell = document.createElement("td");
   const identity = document.createElement("div");
   identity.className = "team-cell";
@@ -364,6 +373,14 @@ function teamStandingElement(team, index) {
   name.className = "team-name";
   name.textContent = team.nickname;
   identity.append(name);
+  if (hasUnrevealedResults) {
+    const marker = document.createElement("span");
+    marker.className = "partial-mark";
+    marker.textContent = "*";
+    marker.title = "Some completed results are still hidden";
+    marker.setAttribute("aria-hidden", "true");
+    identity.append(marker);
+  }
   teamCell.append(identity);
   row.append(teamCell);
 
@@ -398,7 +415,7 @@ function standingsView() {
       </div>
     </div>
     <div class="division-grid" id="division-grid"></div>
-    <div class="legend"><span>Records use only individually revealed scores</span><span>Basic winning-percentage order</span></div>
+    <div class="legend"><span class="partial-legend">* Partial record: some results remain hidden</span><span>Basic winning-percentage order</span></div>
   `;
 
   section.querySelectorAll(".conference-tab").forEach((button) => {
