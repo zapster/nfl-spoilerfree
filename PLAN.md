@@ -114,9 +114,10 @@ Revealing a score must not trigger a data request. It only changes how the
 already-loaded score for that game is rendered.
 
 A per-week `Reveal all` control may reveal every completed result in that week;
-it must not reveal scheduled games or results in another week. Each completed
-game also exposes its own reveal button in the centered score position. Reveal
-state should reset on page load initially rather than being persisted.
+when all results are already visible, it becomes `Hide all`. These controls
+must not reveal scheduled games or results in another week. Each completed
+game also exposes its own centered reveal/hide toggle. Reveal state should
+reset on page load initially rather than being persisted.
 
 Scores are intentionally available in browser memory and persistent storage.
 The spoiler feature prevents accidental display, not deliberate inspection
@@ -345,7 +346,7 @@ It should show:
 - Week number
 - Game date and time
 - Away and home teams
-- A centered per-game result reveal button
+- A centered per-game result reveal/hide toggle
 - Scheduled/final state
 
 Postseason games must not appear in the regular-season schedule.
@@ -543,7 +544,7 @@ Acceptance criteria:
 
 Scope:
 
-- Add a reveal button for each completed game.
+- Add a reveal/hide toggle for each completed game.
 - Hide scores in the presentation layer only.
 - Keep scores in the loaded game data.
 - Keep every score hidden by default.
@@ -553,12 +554,14 @@ Scope:
 Acceptance criteria:
 
 - Clicking one game's centered dash reveals only that game's score.
-- Other completed-game scores remain hidden after a game is revealed.
+- Clicking a revealed score hides that game's score again.
+- Other completed-game scores remain hidden after an individual game is revealed.
+- `Reveal all` and `Hide all` affect only completed games in their week.
 - Scores remain hidden by default on a new page load.
 - Hidden scores cannot be inferred from accessibility text or alternate
   labels.
 - Scheduled games never display fabricated scores.
-- Each reveal button is keyboard-accessible and clearly labeled.
+- Each reveal/hide toggle is keyboard-accessible and clearly labeled.
 
 ### Milestone 5: Browser Cache and Refresh Behavior
 

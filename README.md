@@ -26,7 +26,8 @@ them in memory, and renders every regular-season week with the current week
 marked alongside spoiler-safe standings. The current week is open by default;
 other weeks are compact clickable banners. It does not cache data yet. Scores
 remain hidden until their individual reveal buttons or a week-level `Reveal
-all` button are used; standings count only revealed results.
+all` button are used, and can be hidden again; standings count only revealed
+results.
 
 ## Local Website and NFLverse Fixture
 

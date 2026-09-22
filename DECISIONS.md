@@ -16,7 +16,7 @@ contains the broader implementation plan.
 ## Spoiler Behavior
 
 - Scores are loaded with game data but hidden by default.
-- Each completed game has its own centered reveal button.
+- Each completed game has its own centered reveal/hide toggle.
 - A per-week `Reveal all` control may reveal every completed result in that
   week; scheduled games remain untouched.
 - Revealing one game must not reveal any other game.

@@ -196,9 +196,15 @@ function gameElement(game) {
     });
     matchup.append(reveal);
   } else if (game.status === "final") {
-    const score = document.createElement("span");
+    const score = document.createElement("button");
     score.className = "game-score is-revealed";
+    score.type = "button";
     score.textContent = `${game.awayScore} - ${game.homeScore}`;
+    score.setAttribute("aria-label", `Hide score for ${away.nickname} at ${home.nickname}`);
+    score.addEventListener("click", () => {
+      state.revealed.delete(game.id);
+      render();
+    });
     matchup.append(score);
   } else {
     const score = document.createElement("span");
@@ -258,12 +264,16 @@ function scheduleView() {
       <div class="games"></div>
     `;
     const uncoverAll = week.querySelector(".uncover-all");
-    uncoverAll.textContent = remainingResults.length ? "Reveal all" : completedGames.length ? "All revealed" : "No results";
-    uncoverAll.disabled = remainingResults.length === 0;
+    uncoverAll.textContent = remainingResults.length ? "Reveal all" : completedGames.length ? "Hide all" : "No results";
+    uncoverAll.disabled = completedGames.length === 0;
     uncoverAll.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      remainingResults.forEach((game) => state.revealed.add(game.id));
+      if (remainingResults.length) {
+        completedGames.forEach((game) => state.revealed.add(game.id));
+      } else {
+        completedGames.forEach((game) => state.revealed.delete(game.id));
+      }
       render();
     });
     const list = week.querySelector(".games");
