@@ -17,7 +17,8 @@ contains the broader implementation plan.
 
 - Scores are loaded with game data but hidden by default.
 - Each completed game has its own centered reveal button.
-- There is no whole-week or whole-page `Show results` control.
+- A per-week `Reveal all` control may reveal every completed result in that
+  week; scheduled games remain untouched.
 - Revealing one game must not reveal any other game.
 - Reveal state resets on page load initially.
 - Spoiler protection prevents accidental display, not deliberate inspection of

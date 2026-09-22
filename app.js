@@ -231,6 +231,8 @@ function scheduleView() {
   weeks.forEach((weekNumber) => {
     const games = state.games.filter((game) => game.week === weekNumber);
     const uncoveredGames = games.filter((game) => state.revealed.has(game.id)).length;
+    const completedGames = games.filter((game) => game.status === "final");
+    const remainingResults = completedGames.filter((game) => !state.revealed.has(game.id));
     const week = document.createElement("details");
     week.className = `week-block${weekNumber === state.currentWeek ? " is-current" : ""}`;
     week.open = state.expandedWeeks.has(weekNumber);
@@ -248,12 +250,22 @@ function scheduleView() {
           <span class="week-date">${formatWeekDate(games)}</span>
         </span>
         <span class="week-summary-actions">
+          <button class="uncover-all" type="button"></button>
           <span class="week-count" aria-label="${uncoveredGames} of ${games.length} games uncovered">${uncoveredGames}/${games.length}</span>
           <span class="week-toggle" aria-hidden="true"></span>
         </span>
       </summary>
       <div class="games"></div>
     `;
+    const uncoverAll = week.querySelector(".uncover-all");
+    uncoverAll.textContent = remainingResults.length ? "Reveal all" : completedGames.length ? "All revealed" : "No results";
+    uncoverAll.disabled = remainingResults.length === 0;
+    uncoverAll.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      remainingResults.forEach((game) => state.revealed.add(game.id));
+      render();
+    });
     const list = week.querySelector(".games");
     games.forEach((game) => list.append(gameElement(game)));
     stream.append(week);

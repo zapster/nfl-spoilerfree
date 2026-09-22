@@ -113,9 +113,10 @@ The browser is responsible for:
 Revealing a score must not trigger a data request. It only changes how the
 already-loaded score for that game is rendered.
 
-There must be no whole-week or whole-page `Show results` control. Each
-completed game exposes its own reveal button in the centered score position.
-Reveal state should reset on page load initially rather than being persisted.
+A per-week `Reveal all` control may reveal every completed result in that week;
+it must not reveal scheduled games or results in another week. Each completed
+game also exposes its own reveal button in the centered score position. Reveal
+state should reset on page load initially rather than being persisted.
 
 Scores are intentionally available in browser memory and persistent storage.
 The spoiler feature prevents accidental display, not deliberate inspection
@@ -546,7 +547,8 @@ Scope:
 - Hide scores in the presentation layer only.
 - Keep scores in the loaded game data.
 - Keep every score hidden by default.
-- Do not add a whole-week or whole-page reveal control.
+- Keep any bulk reveal control scoped to one week; never add a whole-page
+  reveal control.
 
 Acceptance criteria:
 
