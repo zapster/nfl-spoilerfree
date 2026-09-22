@@ -258,36 +258,42 @@ function calculateStandings() {
     ties: 0,
     pointsFor: 0,
     pointsAgainst: 0,
-    results: [],
+    history: [],
   }]));
 
   state.games
-    .filter((game) => game.status === "final" && state.revealed.has(game.id))
+    .filter((game) => game.status === "final")
     .forEach((game) => {
       const away = standings.get(game.awayTeam);
       const home = standings.get(game.homeTeam);
       if (!away || !home) return;
+
+      const known = state.revealed.has(game.id);
+      const awayResult = game.awayScore === game.homeScore
+        ? "T"
+        : game.awayScore > game.homeScore ? "W" : "L";
+      const homeResult = game.awayScore === game.homeScore
+        ? "T"
+        : game.homeScore > game.awayScore ? "W" : "L";
+      away.history.push({ result: known ? awayResult : null });
+      home.history.push({ result: known ? homeResult : null });
+      if (!known) return;
+
       away.gamesPlayed += 1;
       home.gamesPlayed += 1;
       away.pointsFor += game.awayScore;
       away.pointsAgainst += game.homeScore;
       home.pointsFor += game.homeScore;
       home.pointsAgainst += game.awayScore;
-      if (game.awayScore === game.homeScore) {
+      if (awayResult === "T") {
         away.ties += 1;
         home.ties += 1;
-        away.results.push("T");
-        home.results.push("T");
-      } else if (game.awayScore > game.homeScore) {
+      } else if (awayResult === "W") {
         away.wins += 1;
         home.losses += 1;
-        away.results.push("W");
-        home.results.push("L");
       } else {
         away.losses += 1;
         home.wins += 1;
-        away.results.push("L");
-        home.results.push("W");
       }
     });
 
@@ -299,11 +305,18 @@ function recordLabel(team) {
 }
 
 function streakLabel(team) {
-  if (team.results.length === 0) return "-";
-  const result = team.results.at(-1);
-  let count = 0;
-  for (let index = team.results.length - 1; index >= 0 && team.results[index] === result; index -= 1) count += 1;
-  return `${result}${count}`;
+  if (team.history.length === 0) return "-";
+  const latest = team.history.at(-1).result;
+  if (!latest) return "?";
+
+  let count = 1;
+  let index = team.history.length - 2;
+  while (index >= 0 && team.history[index].result === latest) {
+    count += 1;
+    index -= 1;
+  }
+  if (index >= 0 && team.history[index].result === null) return `${latest}?`;
+  return `${latest}${count}`;
 }
 
 function teamStandingElement(team, index) {
@@ -323,7 +336,7 @@ function teamStandingElement(team, index) {
   const values = [
     { value: recordLabel(team), className: "record" },
     { value: team.gamesPlayed ? (team.wins / team.gamesPlayed).toFixed(3).replace(/^0/, "") : "-" },
-    { value: streakLabel(team), className: team.results.length ? "streak" : "" },
+    { value: streakLabel(team), className: team.history.length ? "streak" : "" },
   ];
   values.forEach(({ value, className }) => {
     const cell = document.createElement("td");
