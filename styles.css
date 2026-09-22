@@ -217,7 +217,7 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
 .standings-table th:first-child { width: 58%; padding-left: 20px; text-align: left; }
 .standings-table th:last-child, .standings-table td:last-child { padding-right: 20px; }
 .standings-table td { padding: 13px 8px; border-top: 1px solid #efede7; color: var(--muted); font-size: 12px; font-weight: 700; text-align: right; white-space: nowrap; }
-.standings-table tr.has-unrevealed td { background: #fcf7ee; }
+.standings-table tr.has-unrevealed td { background: #faf1e3; }
 .standings-table td:first-child { padding-left: 20px; color: var(--ink); text-align: left; }
 .team-cell { display: flex; align-items: center; gap: 9px; min-width: 0; }
 .rank { width: 14px; color: var(--muted); font-size: 11px; text-align: center; }
