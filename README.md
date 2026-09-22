@@ -22,9 +22,11 @@ The mockup uses sample data and preview logo URLs. It is not yet connected to
 the live nflverse data source.
 
 The initial site fetches the two configured CSV resources directly, normalizes
-them in memory, and renders the current week and spoiler-safe standings. It
-does not cache data yet. Scores remain hidden until their individual reveal
-buttons are used; standings count only revealed results.
+them in memory, and renders every regular-season week with the current week
+marked alongside spoiler-safe standings. The current week is open by default;
+other weeks are compact clickable banners. It does not cache data yet. Scores
+remain hidden until their individual reveal buttons are used; standings count
+only revealed results.
 
 ## Local Website and NFLverse Fixture
 

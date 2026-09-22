@@ -212,23 +212,40 @@ function gameElement(game) {
 }
 
 function scheduleView() {
-  const games = state.games.filter((game) => game.week === state.currentWeek);
+  const weeks = [...new Set(state.games.map((game) => game.week))].sort((left, right) => left - right);
   const section = document.createElement("section");
   section.className = "page-section";
   section.innerHTML = `
     <div class="page-heading">
       <div>
         <p class="eyebrow">${DATA.season} regular season</p>
-        <h1>Week ${state.currentWeek}</h1>
-        <p class="intro">${formatWeekDate(games)} <span aria-hidden="true">•</span> Results hidden by default</p>
+        <h1>Schedule</h1>
+        <p class="intro">Week ${state.currentWeek} is current <span aria-hidden="true">•</span> Results hidden by default</p>
       </div>
-      <div class="data-note">${games.length} games this week</div>
+      <div class="data-note">${weeks.length} weeks loaded</div>
     </div>
-    <div class="games" id="games-list"></div>
-    <p class="view-note">Earlier and later games are loaded from the schedule. Week navigation will be added next.</p>
+    <div class="week-stream" id="week-stream"></div>
   `;
-  const list = section.querySelector("#games-list");
-  games.forEach((game) => list.append(gameElement(game)));
+  const stream = section.querySelector("#week-stream");
+  weeks.forEach((weekNumber) => {
+    const games = state.games.filter((game) => game.week === weekNumber);
+    const week = document.createElement("details");
+    week.className = `week-block${weekNumber === state.currentWeek ? " is-current" : ""}`;
+    week.open = weekNumber === state.currentWeek;
+    week.innerHTML = `
+      <summary class="week-summary">
+        <span class="week-summary-copy">
+          <span class="week-title">Week ${weekNumber}${weekNumber === state.currentWeek ? ' <span class="current-week">Current</span>' : ""}</span>
+          <span class="week-date">${formatWeekDate(games)}</span>
+        </span>
+        <span class="week-toggle" aria-hidden="true"></span>
+      </summary>
+      <div class="games"></div>
+    `;
+    const list = week.querySelector(".games");
+    games.forEach((game) => list.append(gameElement(game)));
+    stream.append(week);
+  });
   return section;
 }
 
