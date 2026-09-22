@@ -8,6 +8,7 @@ const state = {
   games: [],
   teams: new Map(),
   revealed: new Set(),
+  expandedWeeks: new Set(),
   view: window.location.hash === "#standings" ? "standings" : "schedule",
   conference: "AFC",
   currentWeek: null,
@@ -229,16 +230,27 @@ function scheduleView() {
   const stream = section.querySelector("#week-stream");
   weeks.forEach((weekNumber) => {
     const games = state.games.filter((game) => game.week === weekNumber);
+    const uncoveredGames = games.filter((game) => state.revealed.has(game.id)).length;
     const week = document.createElement("details");
     week.className = `week-block${weekNumber === state.currentWeek ? " is-current" : ""}`;
-    week.open = weekNumber === state.currentWeek;
+    week.open = state.expandedWeeks.has(weekNumber);
+    week.addEventListener("toggle", () => {
+      if (week.open) {
+        state.expandedWeeks.add(weekNumber);
+      } else {
+        state.expandedWeeks.delete(weekNumber);
+      }
+    });
     week.innerHTML = `
       <summary class="week-summary">
         <span class="week-summary-copy">
           <span class="week-title">Week ${weekNumber}${weekNumber === state.currentWeek ? ' <span class="current-week">Current</span>' : ""}</span>
           <span class="week-date">${formatWeekDate(games)}</span>
         </span>
-        <span class="week-toggle" aria-hidden="true"></span>
+        <span class="week-summary-actions">
+          <span class="week-count" aria-label="${uncoveredGames} of ${games.length} games uncovered">${uncoveredGames}/${games.length}</span>
+          <span class="week-toggle" aria-hidden="true"></span>
+        </span>
       </summary>
       <div class="games"></div>
     `;
@@ -423,6 +435,7 @@ async function loadData() {
   if (state.games.length === 0 || state.teams.size === 0) throw new Error("NFL data was empty");
   const completedWeeks = state.games.filter((game) => game.status === "final").map((game) => game.week);
   state.currentWeek = Math.max(...completedWeeks);
+  state.expandedWeeks.add(state.currentWeek);
 }
 
 document.querySelectorAll(".view-tab").forEach((tab) => {

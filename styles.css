@@ -110,6 +110,8 @@ h2 { margin-bottom: 0; font-size: 19px; letter-spacing: -.025em; }
 .week-title { font-size: 23px; font-weight: 800; letter-spacing: -.035em; }
 .week-date { color: var(--muted); font-size: 13px; font-weight: 650; }
 .current-week { display: inline-block; margin-left: 7px; padding: 4px 7px; color: var(--green); background: #e5f0ea; border-radius: 999px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; vertical-align: middle; }
+.week-summary-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.week-count { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .04em; }
 .week-toggle { position: relative; display: block; width: 24px; height: 24px; flex: 0 0 auto; color: var(--red); border: 1px solid #d6b5aa; border-radius: 50%; }
 .week-toggle::before, .week-toggle::after { position: absolute; top: 11px; left: 6px; width: 10px; height: 1px; background: currentColor; content: ""; }
 .week-toggle::after { transform: rotate(90deg); }
