@@ -103,7 +103,7 @@ h2 { margin-bottom: 0; font-size: 19px; letter-spacing: -.025em; }
 
 .week-stream { display: grid; gap: 24px; }
 .week-block { min-width: 0; }
-.week-summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 7px 2px 13px; border-bottom: 1px solid var(--line); cursor: pointer; list-style: none; }
+.week-summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 13px 16px; border-bottom: 1px solid var(--line); cursor: pointer; list-style: none; }
 .week-summary::-webkit-details-marker { display: none; }
 .week-summary::marker { display: none; }
 .week-summary-copy { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
@@ -114,8 +114,9 @@ h2 { margin-bottom: 0; font-size: 19px; letter-spacing: -.025em; }
 .week-toggle::before, .week-toggle::after { position: absolute; top: 11px; left: 6px; width: 10px; height: 1px; background: currentColor; content: ""; }
 .week-toggle::after { transform: rotate(90deg); }
 .week-block[open] .week-toggle::after { display: none; }
-.week-block:not([open]) .week-summary { max-width: 100%; padding: 8px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+.week-block:not([open]) .week-summary { max-width: 100%; padding: 13px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
 .week-block:not([open]) .week-summary-copy { align-items: center; }
+.week-block:not([open]) + .week-block:not([open]) { margin-top: -16px; }
 .week-block > .games { margin-top: 12px; }
 
 .games { display: grid; gap: 10px; }
