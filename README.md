@@ -29,7 +29,9 @@ remain hidden until their individual reveal buttons or a week-level `Reveal
 all` button are used, and can be hidden again. The week button stays labeled
 `All revealed` when every available result is visible; standings count only
 revealed results. Teams with incomplete revealed results are marked with an
-asterisk and a subtle row highlight.
+asterisk and a subtle row highlight. Revealed game selections persist across
+reloads in season-specific browser storage; unrevealed and scheduled games stay
+hidden.
 
 ## Local Website and NFLverse Fixture
 
@@ -46,7 +48,7 @@ python3 -m http.server 8787
 
 The website is then available at:
 
-- `http://127.0.0.1:8787/regular-season-mockup.html`
+- `http://127.0.0.1:8787/`
 
 The fixture resources are served from the same origin:
 

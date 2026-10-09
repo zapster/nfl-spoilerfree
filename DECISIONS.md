@@ -8,9 +8,10 @@ contains the broader implementation plan.
 - Regular season and playoffs are distinct top-level views.
 - The regular-season view has Schedule and Standings subviews.
 - Standings are grouped by AFC/NFC conference and division.
-- The regular-season schedule is an endless week stream.
-- The current week is shown first; adjacent weeks are uncovered with controls
-  above and below the stream.
+- The regular-season schedule renders every regular-season week.
+- The current week is expanded by default; all other weeks start collapsed as
+  compact clickable banners.
+- Week expansion state is kept in memory across renders, but not persisted.
 - The playoff view is grouped by playoff round, not regular-season week.
 
 ## Spoiler Behavior
@@ -20,7 +21,10 @@ contains the broader implementation plan.
 - A per-week `Reveal all` control may reveal every completed result in that
   week; scheduled games remain untouched.
 - Revealing one game must not reveal any other game.
-- Reveal state resets on page load initially.
+- Revealed game IDs persist in versioned `localStorage` keys scoped by season.
+- Restore only saved IDs that match currently completed games; new and scheduled
+  games remain hidden until revealed.
+- If local storage is unavailable or invalid, reveal/hide still works in memory.
 - Spoiler protection prevents accidental display, not deliberate inspection of
   browser memory, storage, or developer tools.
 
@@ -49,7 +53,8 @@ contains the broader implementation plan.
 - Team names, divisions, colors, and logos come from the nflverse teams
   metadata release:
   https://github.com/nflverse/nflverse-data/releases/download/teams/teams_colors_logos.csv
-- Use IndexedDB for structured persistent data.
+- Planned: use IndexedDB for structured persistent data once caching is
+  implemented.
 - Results and game status have an initial one-hour TTL.
 - Schedule metadata and team metadata have an initial six-month TTL.
 - Standings are derived from current results rather than persisted initially.
@@ -76,6 +81,30 @@ contains the broader implementation plan.
 - There is no top bar or introductory hero content.
 - The mockup uses sample data and is not connected to live nflverse data.
 
+## Current Implementation Handoff
+
+- The production entry point is `index.html`; the two `*-mockup.html` files
+  remain static design references.
+- The implementation is dependency-free static HTML, CSS, and JavaScript.
+- `app.js` fetches the configured games and team CSVs directly, keeps normalized
+  data in memory, and persists revealed game IDs in season-scoped local storage.
+  There is no IndexedDB, data caching, refresh policy, or automated test suite
+  yet.
+- The current URLs point at the local 2025 fixture under
+  `data/fixtures/2025-mid-week-7/`. To test live NFLverse data, change only
+  `DATA.gamesUrl` and `DATA.teamsUrl` in `app.js`, subject to source CORS.
+- The fixture represents immediately after the Week 7 Thursday game. The
+  browser therefore identifies Week 7 as current from the latest completed
+  regular-season week.
+- Scores are hidden by default. Individual scores toggle reveal/hide; the
+  week control says `Reveal all` until all completed games are visible, then
+  says `All revealed` while remaining clickable to hide them.
+- Standings use only revealed results. Teams with hidden completed results are
+  marked as partial with an asterisk and highlighted rows. Streaks use `?` or
+  `W?`/`L?` when their boundary cannot be known safely.
+- Start local development from the repository root with
+  `python3 -m http.server 8787`, then open `http://127.0.0.1:8787/`.
+
 ## Non-Goals
 
 - No realtime or in-game score polling.
@@ -85,8 +114,9 @@ contains the broader implementation plan.
 
 ## Open Decisions
 
-- Frontend framework and build tool for the application implementation.
 - Exact current-season boundary policy.
 - Basic standings ordering versus official NFL tie-breakers.
 - Whether team logo assets should eventually be mirrored locally.
-- Final normalized data format and browser-fetch implementation.
+- Whether IndexedDB caching should be added and how stale data should be
+  presented.
+- Whether playoff data should be added to the production UI next.

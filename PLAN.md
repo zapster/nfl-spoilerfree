@@ -117,8 +117,10 @@ A per-week `Reveal all` control may reveal every completed result in that week;
 when all results are already visible, it remains labeled `All revealed` and is
 still clickable to hide them. These controls must not reveal scheduled games or
 results in another week. Each completed game also exposes its own centered
-reveal/hide toggle. Reveal state should reset on page load initially rather than
-being persisted.
+reveal/hide toggle. Persist revealed game IDs in local storage across page loads,
+using a separate key for each season. Restore only IDs for games that are
+currently completed; newly completed or scheduled games remain hidden unless
+the user reveals them.
 
 Scores are intentionally available in browser memory and persistent storage.
 The spoiler feature prevents accidental display, not deliberate inspection
@@ -150,7 +152,9 @@ file is downloaded.
 
 Use `IndexedDB` as the primary persistent cache. `localStorage` is acceptable
 for small UI preferences, but is synchronous and less suitable for structured
-game data. Per-game score reveal state should not be persisted initially.
+game data. Persist revealed game IDs as a small, versioned, season-scoped
+`localStorage` preference, separate from cached game data. If browser storage is
+unavailable or invalid, the page should continue with in-memory reveal state.
 
 Each cache entry should include:
 
@@ -335,12 +339,12 @@ view components are preferred so shared behavior is not duplicated.
 
 ## Regular-Season Schedule View
 
-The schedule subview is an endless week stream. It initially centers the
-current week and uses expand controls above and below the visible content to
-uncover the previous or following week without leaving the page.
+The schedule subview renders all regular-season weeks. The current week is
+expanded initially; other weeks use compact clickable summaries and can be
+expanded without leaving the page.
 
-The first mockup centers Week 7 and includes Week 6 and Week 8 as examples of
-the adjacent-week expansion behavior.
+The original mockup centers Week 7 and includes Week 6 and Week 8 as examples
+of the earlier adjacent-week expansion behavior.
 
 It should show:
 
@@ -512,8 +516,9 @@ Acceptance criteria:
 Scope:
 
 - Display games grouped by NFL week.
-- Center the current week in an endless week stream.
-- Add controls above and below the stream to uncover adjacent weeks.
+- Render all regular-season weeks, with the current week expanded by default
+  and other weeks collapsed into compact summaries.
+- Preserve week expansion state across in-memory rerenders.
 - Display matchup, date, and time information.
 - Add the regular-season schedule and standings subviews.
 - Group standings under AFC/NFC conferences and their divisions.
@@ -548,7 +553,9 @@ Scope:
 - Add a reveal/hide toggle for each completed game.
 - Hide scores in the presentation layer only.
 - Keep scores in the loaded game data.
-- Keep every score hidden by default.
+- Keep scores hidden unless the user has previously revealed that game in the
+  selected season.
+- Persist revealed game IDs in season-scoped local storage.
 - Keep any bulk reveal control scoped to one week; never add a whole-page
   reveal control.
 
@@ -559,7 +566,12 @@ Acceptance criteria:
 - Other completed-game scores remain hidden after an individual game is revealed.
 - `Reveal all` and the clickable `All revealed` state affect only completed
   games in their week.
-- Scores remain hidden by default on a new page load.
+- Revealed games remain revealed after a page reload; games not previously
+  revealed remain hidden.
+- Saved reveals for one season do not affect another season.
+- Scheduled or unknown game IDs in saved data are not restored as revealed.
+- Invalid or unavailable local storage does not prevent in-memory reveal/hide
+  behavior.
 - Hidden scores cannot be inferred from accessibility text or alternate
   labels.
 - Scheduled games never display fabricated scores.
@@ -609,7 +621,10 @@ Automated tests should cover:
 - Standings ordering according to the selected tie-breaking policy.
 - Per-game score reveal behavior.
 - Isolation between revealed and unrevealed games.
-- Reset of reveal state on page load.
+- Persistence of revealed game IDs across page loads.
+- Season isolation for saved reveal state.
+- Handling malformed or unavailable local storage.
+- Exclusion of scheduled and unknown game IDs when restoring reveal state.
 - Scheduled games with no scores.
 - Empty or invalid dataset handling.
 
@@ -638,18 +653,13 @@ data.
 - Fantasy statistics
 - External realtime sports APIs
 
-## Decisions Required Before Implementation
+## Remaining Decisions
 
-- Frontend framework and build tool
 - Deployment target
 - Current-season boundary policy
 - Whether postseason games are included by default
 - Whether standings use basic record/PCT ordering or official NFL tie-breakers
-- The source of conference and division membership metadata
-- Whether results are hidden by default
-- Whether the preference persists locally
 - Time-zone handling for `gameday` and `gametime`
-- Whether to use IndexedDB alone or a fallback for older browsers
 - Whether to mirror remote team logo assets locally
 - Which browser-accessible nflverse endpoints to use if CORS is unavailable
-- Final normalized fixture format: JSON, JSONL, or another format
+- IndexedDB cache fallback behavior for older browsers

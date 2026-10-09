@@ -4,6 +4,8 @@ const DATA = {
   teamsUrl: "./data/fixtures/2025-mid-week-7/teams_colors_logos.csv",
 };
 
+const REVEAL_STORAGE_KEY = `nfl-spoiler-free:revealed:v1:${DATA.season}`;
+
 const state = {
   games: [],
   teams: new Map(),
@@ -104,6 +106,33 @@ function normalizeGames(rows) {
     .sort((left, right) => `${left.date} ${left.time}`.localeCompare(`${right.date} ${right.time}`));
 }
 
+function restoreRevealedGames() {
+  try {
+    const saved = localStorage.getItem(REVEAL_STORAGE_KEY);
+    if (!saved) return;
+
+    const gameIds = JSON.parse(saved);
+    if (!Array.isArray(gameIds)) return;
+
+    const completedGameIds = new Set(
+      state.games.filter((game) => game.status === "final").map((game) => game.id),
+    );
+    state.revealed = new Set(
+      gameIds.filter((gameId) => typeof gameId === "string" && completedGameIds.has(gameId)),
+    );
+  } catch {
+    state.revealed.clear();
+  }
+}
+
+function persistRevealedGames() {
+  try {
+    localStorage.setItem(REVEAL_STORAGE_KEY, JSON.stringify([...state.revealed]));
+  } catch {
+    // Revealing games remains available for this page load when storage is blocked.
+  }
+}
+
 function formatDate(date) {
   return new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
     month: "short",
@@ -192,6 +221,7 @@ function gameElement(game) {
     reveal.setAttribute("aria-label", `Reveal score for ${away.nickname} at ${home.nickname}`);
     reveal.addEventListener("click", () => {
       state.revealed.add(game.id);
+      persistRevealedGames();
       render();
     });
     matchup.append(reveal);
@@ -203,6 +233,7 @@ function gameElement(game) {
     score.setAttribute("aria-label", `Hide score for ${away.nickname} at ${home.nickname}`);
     score.addEventListener("click", () => {
       state.revealed.delete(game.id);
+      persistRevealedGames();
       render();
     });
     matchup.append(score);
@@ -281,6 +312,7 @@ function scheduleView() {
       } else {
         completedGames.forEach((game) => state.revealed.delete(game.id));
       }
+      persistRevealedGames();
       render();
     });
     const list = week.querySelector(".games");
@@ -472,6 +504,7 @@ async function loadData() {
   state.games = normalizeGames(parseCsv(gamesText));
   state.teams = normalizeTeams(parseCsv(teamsText));
   if (state.games.length === 0 || state.teams.size === 0) throw new Error("NFL data was empty");
+  restoreRevealedGames();
   const completedWeeks = state.games.filter((game) => game.status === "final").map((game) => game.week);
   state.currentWeek = Math.max(...completedWeeks);
   state.expandedWeeks.add(state.currentWeek);
