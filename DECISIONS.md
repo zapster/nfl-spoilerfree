@@ -11,6 +11,7 @@ contains the broader implementation plan.
 - The regular-season schedule renders every regular-season week.
 - The current week is expanded by default; all other weeks start collapsed as
   compact clickable banners.
+- Entering the Schedule view scrolls to the current week.
 - Week expansion state is kept in memory across renders, but not persisted.
 - A `Manage data` action beside the season picker opens data import, export, and
   reset controls.
@@ -47,6 +48,8 @@ contains the broader implementation plan.
 - The dialog lists that team's regular-season games grouped by week; postseason
   games are excluded.
 - Mark the current week in the team's game list when that week is present.
+- Open the list scrolled to the current week, or the nearest prior team week
+  during a bye.
 - Per-game score controls use the same persisted reveal state as the main views.
 - Closing the dialog returns to the originating view, scroll position, and team
   control.

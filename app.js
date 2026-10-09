@@ -438,7 +438,7 @@ function teamElement(team, home = false) {
   return element;
 }
 
-function gameElement(game, onScoreChange = render) {
+function gameElement(game, onScoreChange = () => render()) {
   const away = teamFor(game.awayTeam);
   const home = teamFor(game.homeTeam);
   const article = document.createElement("article");
@@ -510,6 +510,17 @@ function openTeamGames(abbreviation, trigger) {
   } else {
     teamDialog.showModal();
   }
+  window.requestAnimationFrame(scrollTeamGamesToCurrent);
+}
+
+function scrollTeamGamesToCurrent() {
+  const weeks = [...teamGamesList.querySelectorAll(".team-week")];
+  const target = weeks.find((week) => Number(week.dataset.week) === state.currentWeek)
+    || weeks.filter((week) => Number(week.dataset.week) <= state.currentWeek).at(-1)
+    || weeks[0];
+  if (!target) return;
+
+  teamGamesList.scrollTop += target.getBoundingClientRect().top - teamGamesList.getBoundingClientRect().top;
 }
 
 function renderTeamGames(abbreviation, focusGameId = null) {
@@ -535,6 +546,7 @@ function renderTeamGames(abbreviation, focusGameId = null) {
     const weekGames = games.filter((game) => game.week === weekNumber);
     const week = document.createElement("section");
     week.className = "team-week";
+    week.dataset.week = String(weekNumber);
     const heading = document.createElement("div");
     heading.className = "team-week-heading";
     const title = document.createElement("h3");
@@ -815,7 +827,7 @@ function standingsView() {
   return section;
 }
 
-function render() {
+function render({ scrollToCurrentWeek = false } = {}) {
   document.querySelectorAll(".view-tab").forEach((tab) => {
     const active = tab.dataset.view === state.view;
     tab.classList.toggle("is-active", active);
@@ -823,6 +835,9 @@ function render() {
   });
   content.replaceChildren(state.view === "schedule" ? scheduleView() : standingsView());
   content.hidden = false;
+  if (scrollToCurrentWeek && state.view === "schedule") {
+    window.requestAnimationFrame(() => content.querySelector(".week-block.is-current")?.scrollIntoView({ block: "start" }));
+  }
 }
 
 async function loadData() {
@@ -844,19 +859,19 @@ document.querySelectorAll(".view-tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     state.view = tab.dataset.view;
     window.history.replaceState(null, "", state.view === "standings" ? "#standings" : "#schedule");
-    render();
+    render({ scrollToCurrentWeek: state.view === "schedule" });
   });
 });
 
 window.addEventListener("hashchange", () => {
   state.view = window.location.hash === "#standings" ? "standings" : "schedule";
-  if (state.games.length) render();
+  if (state.games.length) render({ scrollToCurrentWeek: state.view === "schedule" });
 });
 
 loadData()
   .then(() => {
     loading.hidden = true;
-    render();
+    render({ scrollToCurrentWeek: state.view === "schedule" });
   })
   .catch((loadError) => {
     loading.hidden = true;

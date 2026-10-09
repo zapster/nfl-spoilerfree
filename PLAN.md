@@ -523,6 +523,7 @@ Scope:
 - Display games grouped by NFL week.
 - Render all regular-season weeks, with the current week expanded by default
   and other weeks collapsed into compact summaries.
+- Scroll to the current week when entering the Schedule view.
 - Preserve week expansion state across in-memory rerenders.
 - Display matchup, date, and time information.
 - Add the regular-season schedule and standings subviews.
@@ -638,6 +639,8 @@ Acceptance criteria:
 - Activating a team from either view opens the same team-games dialog.
 - Only regular-season games for the selected team appear.
 - The current week is marked in the team list when the team has a game that week.
+- Open the team list at the current week, or the nearest prior team week during
+  a bye.
 - Scheduled games remain scoreless; final scores use the existing reveal state.
 - Revealing or hiding a score in the dialog updates the saved selection and
   standings when the dialog closes.

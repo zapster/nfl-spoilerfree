@@ -192,6 +192,7 @@ h2 { margin-bottom: 0; font-size: 19px; letter-spacing: -.025em; }
 
 .week-stream { display: grid; gap: 24px; }
 .week-block { min-width: 0; }
+.week-block.is-current { scroll-margin-top: 16px; }
 .week-summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 13px 16px; border-bottom: 1px solid var(--line); cursor: pointer; list-style: none; }
 .week-summary::-webkit-details-marker { display: none; }
 .week-summary::marker { display: none; }

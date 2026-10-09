@@ -34,6 +34,8 @@ reloads in season-specific browser storage; unrevealed and scheduled games stay
 hidden. The top navigation's **Manage data** dialog exports those selections
 as versioned JSON, merges imported backups, and can reset this app's saved
 selections across seasons. Backups do not include scores or NFL source data.
+Entering Schedule scrolls to the current week. Team schedules open at the
+current week, or that team's nearest prior week during a bye.
 Click a team's name or logo in the schedule or standings to open a sheet
 listing its regular-season games. The sheet nearly fills the screen on desktop
 and mobile.
