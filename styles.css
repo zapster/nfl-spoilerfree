@@ -202,6 +202,8 @@ h2 { margin-bottom: 0; font-size: 19px; letter-spacing: -.025em; }
 .week-summary-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
 .uncover-all { padding: 5px 8px; color: var(--red); background: transparent; border: 1px solid #d6b5aa; border-radius: 999px; cursor: pointer; font-size: 11px; font-weight: 800; white-space: nowrap; }
 .uncover-all:hover { background: #fff7f3; }
+.uncover-all.is-all-revealed { color: var(--green); background: #e5f0ea; border-color: #bad4c5; }
+.uncover-all.is-all-revealed:hover { background: #dcebe2; }
 .uncover-all:disabled { color: var(--muted); background: transparent; border-color: var(--line); cursor: default; opacity: .7; }
 .week-count { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .04em; }
 .week-toggle { position: relative; display: block; width: 24px; height: 24px; flex: 0 0 auto; color: var(--red); border: 1px solid #d6b5aa; border-radius: 50%; }

@@ -614,6 +614,7 @@ function scheduleView() {
     `;
     const uncoverAll = week.querySelector(".uncover-all");
     const allRevealed = completedGames.length > 0 && remainingResults.length === 0;
+    uncoverAll.classList.toggle("is-all-revealed", allRevealed);
     uncoverAll.textContent = remainingResults.length ? "Reveal all" : completedGames.length ? "All revealed" : "No results";
     uncoverAll.disabled = completedGames.length === 0;
     uncoverAll.title = !completedGames.length
