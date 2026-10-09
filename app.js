@@ -4,7 +4,11 @@ const DATA = {
   teamsUrl: "./data/fixtures/2025-mid-week-7/teams_colors_logos.csv",
 };
 
-const REVEAL_STORAGE_KEY = `nfl-spoiler-free:revealed:v1:${DATA.season}`;
+const APP_STORAGE_PREFIX = "nfl-spoiler-free:";
+const REVEAL_STORAGE_PREFIX = `${APP_STORAGE_PREFIX}revealed:v1:`;
+const REVEAL_STORAGE_KEY = `${REVEAL_STORAGE_PREFIX}${DATA.season}`;
+const DATA_BACKUP_FORMAT = "nfl-spoiler-free-data";
+const DATA_BACKUP_VERSION = 1;
 
 const state = {
   games: [],
@@ -19,6 +23,8 @@ const state = {
 const loading = document.querySelector("#loading");
 const error = document.querySelector("#error");
 const content = document.querySelector("#content");
+const dataDialog = document.querySelector("#data-dialog");
+const dataStatus = document.querySelector("#data-status");
 
 function parseCsv(text) {
   const records = [];
@@ -106,22 +112,21 @@ function normalizeGames(rows) {
     .sort((left, right) => `${left.date} ${left.time}`.localeCompare(`${right.date} ${right.time}`));
 }
 
+function completedGameIds() {
+  return new Set(state.games.filter((game) => game.status === "final").map((game) => game.id));
+}
+
 function restoreRevealedGames() {
+  const completedIds = completedGameIds();
   try {
     const saved = localStorage.getItem(REVEAL_STORAGE_KEY);
-    if (!saved) return;
-
-    const gameIds = JSON.parse(saved);
-    if (!Array.isArray(gameIds)) return;
-
-    const completedGameIds = new Set(
-      state.games.filter((game) => game.status === "final").map((game) => game.id),
-    );
+    const gameIds = saved ? JSON.parse(saved) : [];
     state.revealed = new Set(
-      gameIds.filter((gameId) => typeof gameId === "string" && completedGameIds.has(gameId)),
+      [...state.revealed, ...(Array.isArray(gameIds) ? gameIds : [])]
+        .filter((gameId) => typeof gameId === "string" && completedIds.has(gameId)),
     );
   } catch {
-    state.revealed.clear();
+    state.revealed = new Set([...state.revealed].filter((gameId) => completedIds.has(gameId)));
   }
 }
 
@@ -132,6 +137,201 @@ function persistRevealedGames() {
     // Revealing games remains available for this page load when storage is blocked.
   }
 }
+
+function readSavedRevealSets() {
+  const seasons = new Map();
+  let available = true;
+  try {
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (!key?.startsWith(REVEAL_STORAGE_PREFIX)) continue;
+
+      const season = key.slice(REVEAL_STORAGE_PREFIX.length);
+      if (!/^\d{4}$/.test(season)) continue;
+      let saved;
+      try {
+        saved = localStorage.getItem(key);
+      } catch {
+        available = false;
+        continue;
+      }
+      try {
+        const gameIds = JSON.parse(saved);
+        if (Array.isArray(gameIds)) {
+          seasons.set(season, new Set(gameIds.filter((gameId) => typeof gameId === "string" && gameId)));
+        }
+      } catch {
+        // Ignore malformed entries and keep reading other seasons.
+      }
+    }
+    return { seasons, available };
+  } catch {
+    return { seasons, available: false };
+  }
+}
+
+function validateDataBackup(backup) {
+  if (!backup || typeof backup !== "object" || Array.isArray(backup)
+    || backup.format !== DATA_BACKUP_FORMAT || backup.version !== DATA_BACKUP_VERSION
+    || typeof backup.exportedAt !== "string" || Number.isNaN(Date.parse(backup.exportedAt))
+    || !backup.revealedGames || typeof backup.revealedGames !== "object"
+    || Array.isArray(backup.revealedGames)) {
+    throw new Error("This is not a supported NFL Spoiler-Free JSON backup.");
+  }
+
+  const seasons = new Map();
+  Object.entries(backup.revealedGames).forEach(([season, gameIds]) => {
+    if (!/^\d{4}$/.test(season) || !Array.isArray(gameIds)
+      || gameIds.some((gameId) => typeof gameId !== "string" || !gameId)) {
+      throw new Error("The backup contains an invalid season or game ID list.");
+    }
+    seasons.set(season, new Set(gameIds));
+  });
+  return seasons;
+}
+
+function saveRevealSets(seasons) {
+  let saved = true;
+  seasons.forEach((gameIds, season) => {
+    try {
+      localStorage.setItem(`${REVEAL_STORAGE_PREFIX}${season}`, JSON.stringify([...gameIds]));
+    } catch {
+      saved = false;
+    }
+  });
+  return saved;
+}
+
+function setDataStatus(message, isError = false) {
+  dataStatus.textContent = message;
+  dataStatus.classList.toggle("is-error", isError);
+}
+
+function createDataBackup() {
+  const { seasons, available } = readSavedRevealSets();
+  const currentSeason = String(DATA.season);
+  const currentReveals = seasons.get(currentSeason) || new Set();
+  state.revealed.forEach((gameId) => currentReveals.add(gameId));
+  seasons.set(currentSeason, currentReveals);
+
+  return {
+    available,
+    backup: {
+      format: DATA_BACKUP_FORMAT,
+      version: DATA_BACKUP_VERSION,
+      exportedAt: new Date().toISOString(),
+      revealedGames: Object.fromEntries([...seasons.entries()]
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([season, gameIds]) => [season, [...gameIds].sort()])),
+    },
+  };
+}
+
+function mergeDataBackup(importedSeasons) {
+  const { seasons, available } = readSavedRevealSets();
+  const currentSeason = String(DATA.season);
+  const currentReveals = seasons.get(currentSeason) || new Set();
+  state.revealed.forEach((gameId) => currentReveals.add(gameId));
+  seasons.set(currentSeason, currentReveals);
+
+  importedSeasons.forEach((gameIds, season) => {
+    const merged = seasons.get(season) || new Set();
+    gameIds.forEach((gameId) => merged.add(gameId));
+    seasons.set(season, merged);
+  });
+
+  if (state.games.length) {
+    const completedIds = completedGameIds();
+    seasons.set(currentSeason, new Set(
+      [...(seasons.get(currentSeason) || [])].filter((gameId) => completedIds.has(gameId)),
+    ));
+  }
+  state.revealed = new Set(seasons.get(currentSeason) || []);
+  const saved = available && saveRevealSets(seasons);
+  if (state.games.length) render();
+  return { saved, available };
+}
+
+function resetSavedData() {
+  let cleared = true;
+  try {
+    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(APP_STORAGE_PREFIX)) localStorage.removeItem(key);
+    }
+  } catch {
+    cleared = false;
+  }
+  state.revealed.clear();
+  if (state.games.length) render();
+  return cleared;
+}
+
+document.querySelector("#manage-data").addEventListener("click", () => {
+  setDataStatus("");
+  dataDialog.showModal();
+});
+
+document.querySelector("#close-data-dialog").addEventListener("click", () => dataDialog.close());
+
+dataDialog.addEventListener("click", (event) => {
+  if (event.target === dataDialog) dataDialog.close();
+});
+
+document.querySelector("#export-data").addEventListener("click", () => {
+  try {
+    const { backup, available } = createDataBackup();
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `nfl-spoiler-free-data-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setDataStatus(available
+      ? "JSON backup downloaded."
+      : "Downloaded the current selection; browser storage was unavailable for other seasons.", !available);
+  } catch {
+    setDataStatus("The JSON backup could not be created.", true);
+  }
+});
+
+document.querySelector("#import-data").addEventListener("change", async (event) => {
+  const input = event.currentTarget;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  try {
+    const backup = JSON.parse(await file.text());
+    const importedSeasons = validateDataBackup(backup);
+    const { saved, available } = mergeDataBackup(importedSeasons);
+    setDataStatus(saved
+      ? "Selections merged from the JSON backup."
+      : available
+        ? "Selections merged for this page, but browser storage could not save all seasons."
+        : "Selections merged for this page, but browser storage could not be read or updated.", !saved);
+  } catch (importError) {
+    setDataStatus(importError instanceof SyntaxError
+      ? "The selected file is not valid JSON."
+      : importError.message || "The JSON backup could not be imported.", true);
+  } finally {
+    input.value = "";
+  }
+});
+
+document.querySelector("#reset-data").addEventListener("click", () => {
+  const confirmed = window.confirm(
+    "Reset all saved NFL Spoiler-Free reveal selections in this browser? This cannot be undone.",
+  );
+  if (!confirmed) return;
+
+  const cleared = resetSavedData();
+  setDataStatus(cleared
+    ? "All saved reveal selections were cleared."
+    : "The current selection was cleared, but browser storage could not be fully cleared.", !cleared);
+});
 
 function formatDate(date) {
   return new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {

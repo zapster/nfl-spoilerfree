@@ -19,6 +19,7 @@ body {
 }
 
 button, select { font: inherit; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 
 .app-shell, .site-footer {
   width: min(1040px, calc(100% - 40px));
@@ -69,6 +70,54 @@ button, select { font: inherit; }
   font-size: 13px;
   font-weight: 750;
 }
+
+.nav-tools { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+
+.manage-data-button, .data-action-button, .dialog-close, .file-picker > span {
+  padding: 8px 11px;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.manage-data-button { margin-bottom: 10px; white-space: nowrap; }
+.manage-data-button:hover, .data-action-button:hover, .dialog-close:hover, .file-picker > span:hover { border-color: #b9b3a8; }
+
+.data-dialog {
+  width: min(560px, calc(100% - 28px));
+  max-height: min(720px, calc(100% - 32px));
+  overflow: auto;
+  padding: 0;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(26, 37, 52, .24);
+}
+
+.data-dialog::backdrop { background: rgba(24, 33, 47, .48); }
+.data-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 24px 26px 0; }
+.data-dialog-header .eyebrow { color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.data-dialog-header h2 { margin: 0; font-size: 25px; letter-spacing: -.04em; }
+.dialog-close { flex: 0 0 auto; }
+.data-dialog-content { padding: 8px 26px 24px; }
+.data-action { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.data-action h3 { margin: 0 0 5px; font-size: 14px; }
+.data-action p { max-width: 350px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.data-action-button { flex: 0 0 auto; white-space: nowrap; }
+.data-import { align-items: flex-start; flex-direction: column; gap: 13px; }
+.file-picker { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+.file-picker > span { display: inline-block; }
+.file-picker input { max-width: 100%; font-size: 12px; }
+.data-reset { border-bottom: 0; }
+.danger-button { color: #9b3d2c; border-color: #e8c9c0; }
+.danger-button:hover { background: #fff5f1; border-color: #d88b78; }
+.data-status { min-height: 1.5em; margin: 8px 0 0; color: var(--green); font-size: 12px; line-height: 1.5; }
+.data-status.is-error { color: #9b3d2c; }
 
 .loading-state, .error-state {
   padding: 32px 0;
@@ -252,4 +301,15 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .standings-table th:last-child, .standings-table td:last-child { padding-right: 14px; }
   .legend, .site-footer { display: block; }
   .legend span, .site-footer span { display: block; margin-bottom: 6px; }
+}
+
+@media (max-width: 480px) {
+  .view-nav { flex-wrap: wrap; }
+  .nav-tools { flex-basis: 100%; justify-content: flex-end; gap: 8px; padding-bottom: 10px; }
+  .season-picker { padding-bottom: 0; }
+  .manage-data-button { margin-bottom: 0; }
+  .data-dialog-header { padding: 20px 20px 0; }
+  .data-dialog-content { padding: 8px 20px 20px; }
+  .data-action { align-items: stretch; flex-direction: column; gap: 12px; }
+  .data-action-button { width: 100%; }
 }

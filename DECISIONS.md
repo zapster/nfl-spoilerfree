@@ -12,6 +12,8 @@ contains the broader implementation plan.
 - The current week is expanded by default; all other weeks start collapsed as
   compact clickable banners.
 - Week expansion state is kept in memory across renders, but not persisted.
+- A `Manage data` action beside the season picker opens data import, export, and
+  reset controls.
 - The playoff view is grouped by playoff round, not regular-season week.
 
 ## Spoiler Behavior
@@ -27,6 +29,16 @@ contains the broader implementation plan.
 - If local storage is unavailable or invalid, reveal/hide still works in memory.
 - Spoiler protection prevents accidental display, not deliberate inspection of
   browser memory, storage, or developer tools.
+
+## User Data Management
+
+- Export a versioned JSON backup containing revealed game IDs grouped by season;
+  do not include scores or downloaded NFL data.
+- Import merges and deduplicates revealed IDs with existing selections.
+- Only IDs matching completed games in the loaded season are restored as
+  revealed.
+- Reset asks for confirmation and clears only this app's saved data across all
+  seasons, not unrelated browser storage.
 
 ## Partial-Result Standings
 
@@ -90,6 +102,8 @@ contains the broader implementation plan.
   data in memory, and persists revealed game IDs in season-scoped local storage.
   There is no IndexedDB, data caching, refresh policy, or automated test suite
   yet.
+- The `Manage data` dialog exports/imports revealed-game selections as JSON and
+  can reset this app's saved reveal selections across seasons.
 - The current URLs point at the local 2025 fixture under
   `data/fixtures/2025-mid-week-7/`. To test live NFLverse data, change only
   `DATA.gamesUrl` and `DATA.teamsUrl` in `app.js`, subject to source CORS.
@@ -110,7 +124,8 @@ contains the broader implementation plan.
 - No realtime or in-game score polling.
 - No play-by-play data.
 - No runtime application server requirement.
-- No manual backup-file workflow; Git is the source of history.
+- No manual backup workflow for the upstream NFL schedule or score data; JSON
+  backups cover user reveal selections only.
 
 ## Open Decisions
 

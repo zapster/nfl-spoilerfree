@@ -31,7 +31,9 @@ all` button are used, and can be hidden again. The week button stays labeled
 revealed results. Teams with incomplete revealed results are marked with an
 asterisk and a subtle row highlight. Revealed game selections persist across
 reloads in season-specific browser storage; unrevealed and scheduled games stay
-hidden.
+hidden. The top navigation's **Manage data** dialog exports those selections
+as versioned JSON, merges imported backups, and can reset this app's saved
+selections across seasons. Backups do not include scores or NFL source data.
 
 ## Local Website and NFLverse Fixture
 

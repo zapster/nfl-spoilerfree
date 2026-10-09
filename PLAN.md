@@ -156,6 +156,11 @@ game data. Persist revealed game IDs as a small, versioned, season-scoped
 `localStorage` preference, separate from cached game data. If browser storage is
 unavailable or invalid, the page should continue with in-memory reveal state.
 
+The `Manage data` dialog should export revealed IDs for all seasons as a
+versioned JSON file. Imports merge IDs with existing selections. Reset should
+clear only this application's saved data across seasons, never all origin-wide
+browser storage. The backup excludes scores and downloaded NFL data.
+
 Each cache entry should include:
 
 ```js
@@ -597,6 +602,27 @@ Acceptance criteria:
 - Refresh failures are visible without replacing valid cached data.
 - The app remains usable with stale cached data when offline.
 
+### Milestone 6: User Data Management
+
+Scope:
+
+- Add a `Manage data` dialog beside the season picker.
+- Export revealed-game IDs for all seasons to a versioned JSON backup.
+- Import valid backups by merging and deduplicating selections.
+- Reset all app-owned saved data across seasons after confirmation.
+
+Acceptance criteria:
+
+- The JSON backup includes a format identifier, schema version, export timestamp,
+  and season-grouped revealed game IDs, but no scores or schedule data.
+- Import rejects unsupported or malformed backup files without changing saved
+  selections.
+- Import merges rather than replaces existing selections.
+- Imported IDs for the loaded season reveal only games currently marked final.
+- Reset clears this app's saved data without deleting unrelated local storage.
+- Export, import, and reset report storage failures without crashing the app.
+- The dialog remains usable on narrow screens and by keyboard.
+
 ## Testing Strategy
 
 Automated tests should cover:
@@ -625,6 +651,9 @@ Automated tests should cover:
 - Season isolation for saved reveal state.
 - Handling malformed or unavailable local storage.
 - Exclusion of scheduled and unknown game IDs when restoring reveal state.
+- JSON backup serialization and schema validation.
+- Import merge and deduplication across seasons.
+- Reset isolation from unrelated local storage keys.
 - Scheduled games with no scores.
 - Empty or invalid dataset handling.
 
