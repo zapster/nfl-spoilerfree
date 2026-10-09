@@ -40,6 +40,17 @@ contains the broader implementation plan.
 - Reset asks for confirmation and clears only this app's saved data across all
   seasons, not unrelated browser storage.
 
+## Team Game Drilldown
+
+- Clicking a team's identity in Schedule or Standings opens a shared nearly
+  full-screen dialog on desktop and mobile.
+- The dialog lists that team's regular-season games grouped by week; postseason
+  games are excluded.
+- Mark the current week in the team's game list when that week is present.
+- Per-game score controls use the same persisted reveal state as the main views.
+- Closing the dialog returns to the originating view, scroll position, and team
+  control.
+
 ## Partial-Result Standings
 
 - Standings are calculated only from completed games whose results the user has

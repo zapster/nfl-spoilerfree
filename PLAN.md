@@ -623,6 +623,29 @@ Acceptance criteria:
 - Export, import, and reset report storage failures without crashing the app.
 - The dialog remains usable on narrow screens and by keyboard.
 
+### Milestone 7: Team Game Drilldown
+
+Scope:
+
+- Make team identities actionable in schedule matchups and standings rows.
+- Show each team's regular-season games in a shared near-full-screen dialog on
+  desktop and mobile.
+- Group games chronologically by regular-season week.
+- Reuse spoiler-safe per-game score controls and saved reveal state.
+
+Acceptance criteria:
+
+- Activating a team from either view opens the same team-games dialog.
+- Only regular-season games for the selected team appear.
+- The current week is marked in the team list when the team has a game that week.
+- Scheduled games remain scoreless; final scores use the existing reveal state.
+- Revealing or hiding a score in the dialog updates the saved selection and
+  standings when the dialog closes.
+- Closing by button, backdrop, or Escape returns focus to that team and restores
+  the originating view and scroll position.
+- The near-full-screen dialog and its game list work on desktop, mobile, and via
+  keyboard.
+
 ## Testing Strategy
 
 Automated tests should cover:
@@ -654,6 +677,9 @@ Automated tests should cover:
 - JSON backup serialization and schema validation.
 - Import merge and deduplication across seasons.
 - Reset isolation from unrelated local storage keys.
+- Team-game filtering and week ordering.
+- Opening team games from schedule and standings.
+- Shared spoiler state and focus/scroll restoration for the team dialog.
 - Scheduled games with no scores.
 - Empty or invalid dataset handling.
 

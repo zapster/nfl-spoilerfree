@@ -25,6 +25,15 @@ const error = document.querySelector("#error");
 const content = document.querySelector("#content");
 const dataDialog = document.querySelector("#data-dialog");
 const dataStatus = document.querySelector("#data-status");
+const teamDialog = document.querySelector("#team-dialog");
+const teamDialogLogo = document.querySelector("#team-dialog-logo");
+const teamDialogTitle = document.querySelector("#team-dialog-title");
+const teamDialogSeason = document.querySelector("#team-dialog-season");
+const teamGamesList = document.querySelector("#team-games-list");
+
+let returnTeamAbbreviation = null;
+let returnTeamGameId = null;
+let teamDialogReturnScroll = 0;
 
 function parseCsv(text) {
   const records = [];
@@ -333,6 +342,30 @@ document.querySelector("#reset-data").addEventListener("click", () => {
     : "The current selection was cleared, but browser storage could not be fully cleared.", !cleared);
 });
 
+document.querySelector("#close-team-dialog").addEventListener("click", () => teamDialog.close());
+
+teamDialog.addEventListener("click", (event) => {
+  if (event.target === teamDialog) teamDialog.close();
+});
+
+teamDialog.addEventListener("close", () => {
+  const abbreviation = returnTeamAbbreviation;
+  const gameId = returnTeamGameId;
+  returnTeamAbbreviation = null;
+  returnTeamGameId = null;
+  if (!abbreviation) return;
+
+  render();
+  window.scrollTo(0, teamDialogReturnScroll);
+  window.requestAnimationFrame(() => {
+    const teamButtons = [...content.querySelectorAll("[data-team-abbr]")];
+    const returnButton = teamButtons.find((button) => button.dataset.teamAbbr === abbreviation
+      && (!gameId || button.dataset.gameId === gameId))
+      || teamButtons.find((button) => button.dataset.teamAbbr === abbreviation);
+    returnButton?.focus({ preventScroll: true });
+  });
+});
+
 function formatDate(date) {
   return new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
     month: "short",
@@ -387,8 +420,14 @@ function logoElement(team, size = "large") {
 }
 
 function teamElement(team, home = false) {
-  const element = document.createElement("div");
+  const element = document.createElement("button");
+  element.type = "button";
   element.className = `team${home ? " home" : ""}`;
+  element.dataset.teamAbbr = team.abbreviation;
+  element.setAttribute("aria-label", `View ${team.name} regular-season games`);
+  element.setAttribute("aria-haspopup", "dialog");
+  element.setAttribute("aria-controls", "team-dialog");
+  element.addEventListener("click", (event) => openTeamGames(team.abbreviation, event.currentTarget));
   const name = document.createElement("span");
   name.textContent = team.nickname;
   if (home) {
@@ -399,7 +438,7 @@ function teamElement(team, home = false) {
   return element;
 }
 
-function gameElement(game) {
+function gameElement(game, onScoreChange = render) {
   const away = teamFor(game.awayTeam);
   const home = teamFor(game.homeTeam);
   const article = document.createElement("article");
@@ -411,30 +450,34 @@ function gameElement(game) {
 
   const matchup = document.createElement("div");
   matchup.className = "matchup";
-  matchup.append(teamElement(away));
+  const awayElement = teamElement(away);
+  awayElement.dataset.gameId = game.id;
+  matchup.append(awayElement);
 
   if (game.status === "final" && !state.revealed.has(game.id)) {
     const reveal = document.createElement("button");
     reveal.className = "game-score";
     reveal.type = "button";
+    reveal.dataset.gameId = game.id;
     reveal.textContent = "-";
     reveal.setAttribute("aria-label", `Reveal score for ${away.nickname} at ${home.nickname}`);
     reveal.addEventListener("click", () => {
       state.revealed.add(game.id);
       persistRevealedGames();
-      render();
+      onScoreChange(game.id);
     });
     matchup.append(reveal);
   } else if (game.status === "final") {
     const score = document.createElement("button");
     score.className = "game-score is-revealed";
     score.type = "button";
+    score.dataset.gameId = game.id;
     score.textContent = `${game.awayScore} - ${game.homeScore}`;
     score.setAttribute("aria-label", `Hide score for ${away.nickname} at ${home.nickname}`);
     score.addEventListener("click", () => {
       state.revealed.delete(game.id);
       persistRevealedGames();
-      render();
+      onScoreChange(game.id);
     });
     matchup.append(score);
   } else {
@@ -444,9 +487,84 @@ function gameElement(game) {
     matchup.append(score);
   }
 
-  matchup.append(teamElement(home, true));
+  const homeElement = teamElement(home, true);
+  homeElement.dataset.gameId = game.id;
+  matchup.append(homeElement);
   article.append(time, matchup);
   return article;
+}
+
+function openTeamGames(abbreviation, trigger) {
+  const alreadyOpen = teamDialog.open;
+  if (!alreadyOpen) {
+    returnTeamAbbreviation = abbreviation;
+    returnTeamGameId = trigger?.dataset.gameId || null;
+    teamDialogReturnScroll = window.scrollY;
+  }
+  teamGamesList.scrollTop = 0;
+  renderTeamGames(abbreviation);
+  if (alreadyOpen) {
+    [...teamGamesList.querySelectorAll("[data-team-abbr]")]
+      .find((button) => button.dataset.teamAbbr === abbreviation)
+      ?.focus({ preventScroll: true });
+  } else {
+    teamDialog.showModal();
+  }
+}
+
+function renderTeamGames(abbreviation, focusGameId = null) {
+  const team = teamFor(abbreviation);
+  const games = state.games.filter((game) => game.gameType === "REG"
+    && (game.awayTeam === abbreviation || game.homeTeam === abbreviation));
+  const scrollTop = teamGamesList.scrollTop;
+  teamDialogLogo.replaceChildren(logoElement(team));
+  teamDialogTitle.textContent = `${team.name} Games`;
+  teamDialogSeason.textContent = `${DATA.season} regular season`;
+  teamGamesList.replaceChildren();
+
+  if (games.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "team-games-empty";
+    empty.textContent = "No regular-season games are available for this team.";
+    teamGamesList.append(empty);
+    return;
+  }
+
+  const weeks = [...new Set(games.map((game) => game.week))].sort((left, right) => left - right);
+  weeks.forEach((weekNumber) => {
+    const weekGames = games.filter((game) => game.week === weekNumber);
+    const week = document.createElement("section");
+    week.className = "team-week";
+    const heading = document.createElement("div");
+    heading.className = "team-week-heading";
+    const title = document.createElement("h3");
+    title.textContent = `Week ${weekNumber}`;
+    if (weekNumber === state.currentWeek) {
+      const currentMarker = document.createElement("span");
+      currentMarker.className = "current-week";
+      currentMarker.textContent = "Current";
+      title.append(currentMarker);
+    }
+    const date = document.createElement("span");
+    date.className = "team-week-date";
+    date.textContent = formatWeekDate(weekGames);
+    heading.append(title, date);
+    const list = document.createElement("div");
+    list.className = "team-week-games";
+    weekGames.forEach((game) => list.append(gameElement(
+      game,
+      (gameId) => renderTeamGames(abbreviation, gameId),
+    )));
+    week.append(heading, list);
+    teamGamesList.append(week);
+  });
+
+  teamGamesList.scrollTop = scrollTop;
+  if (focusGameId) {
+    [...teamGamesList.querySelectorAll(".game-score[data-game-id]")]
+      .find((button) => button.dataset.gameId === focusGameId)
+      ?.focus({ preventScroll: true });
+  }
 }
 
 function scheduleView() {
@@ -599,12 +717,23 @@ function teamStandingElement(team, index) {
   const teamCell = document.createElement("td");
   const identity = document.createElement("div");
   identity.className = "team-cell";
-  identity.innerHTML = `<span class="rank">${index + 1}</span>`;
-  identity.append(logoElement(team, "small"));
+  const rank = document.createElement("span");
+  rank.className = "rank";
+  rank.textContent = String(index + 1);
+  const teamButton = document.createElement("button");
+  teamButton.className = "team-identity-button";
+  teamButton.type = "button";
+  teamButton.dataset.teamAbbr = team.abbreviation;
+  teamButton.setAttribute("aria-label", `View ${team.name} regular-season games`);
+  teamButton.setAttribute("aria-haspopup", "dialog");
+  teamButton.setAttribute("aria-controls", "team-dialog");
+  teamButton.addEventListener("click", (event) => openTeamGames(team.abbreviation, event.currentTarget));
+  teamButton.append(logoElement(team, "small"));
   const name = document.createElement("span");
   name.className = "team-name";
   name.textContent = team.nickname;
-  identity.append(name);
+  teamButton.append(name);
+  identity.append(rank, teamButton);
   if (hasUnrevealedResults) {
     const marker = document.createElement("span");
     marker.className = "partial-mark";

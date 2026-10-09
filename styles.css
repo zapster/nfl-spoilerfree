@@ -119,6 +119,46 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .data-status { min-height: 1.5em; margin: 8px 0 0; color: var(--green); font-size: 12px; line-height: 1.5; }
 .data-status.is-error { color: #9b3d2c; }
 
+button.team { width: 100%; padding: 0; color: inherit; background: transparent; border: 0; cursor: pointer; text-align: left; }
+button.team:hover > span:not(.team-logo) { text-decoration: underline; text-decoration-color: rgba(24, 33, 47, .35); text-underline-offset: 4px; }
+.team-identity-button { display: flex; align-items: center; flex: 1; gap: 9px; min-width: 0; padding: 0; color: var(--ink); background: transparent; border: 0; cursor: pointer; font: inherit; text-align: left; }
+.team-identity-button:hover .team-name { text-decoration: underline; text-decoration-color: rgba(24, 33, 47, .35); text-underline-offset: 3px; }
+.team-identity-button:focus-visible, button.team:focus-visible { border-radius: 8px; }
+
+.team-dialog {
+  display: flex;
+  width: min(96vw, 1800px);
+  height: min(94vh, 1100px);
+  height: min(94dvh, 1100px);
+  max-width: calc(100vw - 16px);
+  max-height: calc(100dvh - 16px);
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 24px 90px rgba(26, 37, 52, .28);
+}
+
+.team-dialog::backdrop { background: rgba(24, 33, 47, .62); }
+.team-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px 32px; background: var(--card); border-bottom: 1px solid var(--line); }
+.team-dialog-heading { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.team-dialog-logo { flex: 0 0 auto; }
+.team-dialog-logo .team-logo { width: 64px; height: 64px; }
+.team-dialog-header h2 { margin: 0 0 5px; font-size: clamp(21px, 3vw, 30px); letter-spacing: -.04em; }
+.team-dialog-header .eyebrow { margin-bottom: 4px; color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.team-dialog-description { margin: 0; color: var(--muted); font-size: 12px; }
+.team-dialog-content { flex: 1; min-height: 0; overflow: auto; padding: 8px clamp(18px, 3vw, 44px) 32px; overscroll-behavior: contain; }
+.team-week { padding: 18px 0 22px; border-bottom: 1px solid var(--line); }
+.team-week-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.team-week-heading h3 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+.team-week-date { color: var(--muted); font-size: 12px; }
+.team-week-games { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.team-week-games .game-card { width: 100%; max-width: 960px; margin-inline: auto; }
+.team-games-empty { padding: 32px 0; color: var(--muted); }
+
 .loading-state, .error-state {
   padding: 32px 0;
   color: var(--muted);
@@ -292,6 +332,10 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .team { gap: 6px; font-size: 20px; }
   .game-score { min-width: 48px; font-size: 26px; }
   .team-logo { width: 48px; height: 48px; font-size: 9px; }
+  .team-dialog-header { gap: 12px; padding: 18px; }
+  .team-dialog-heading { gap: 11px; }
+  .team-dialog-logo .team-logo { width: 48px; height: 48px; }
+  .team-dialog-content { padding: 4px 18px 22px; }
   .standings-heading .conference-tabs { display: flex; margin-top: 20px; }
   .conference-tab { flex: 1; }
   .division-grid { grid-template-columns: 1fr; gap: 14px; }
@@ -312,4 +356,11 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .data-dialog-content { padding: 8px 20px 20px; }
   .data-action { align-items: stretch; flex-direction: column; gap: 12px; }
   .data-action-button { width: 100%; }
+  .team-dialog { width: calc(100vw - 12px); height: calc(100dvh - 12px); max-width: none; max-height: none; border-radius: 14px; }
+  .team-dialog-header { padding: 14px; }
+  .team-dialog-heading { gap: 9px; }
+  .team-dialog-description { max-width: 35ch; font-size: 11px; }
+  .team-dialog-header .dialog-close { padding: 7px 9px; font-size: 12px; }
+  .team-dialog-content { padding: 2px 14px 16px; }
+  .team-week { padding: 15px 0 18px; }
 }
