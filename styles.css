@@ -330,6 +330,7 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .game-time { font-size: 11px; }
   .matchup { grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); gap: 7px; }
   .team { gap: 6px; font-size: 20px; }
+  .team > span:not(.team-logo) { display: none; }
   .game-score { min-width: 48px; font-size: 26px; }
   .team-logo { width: 48px; height: 48px; font-size: 9px; }
   .team-dialog-header { gap: 12px; padding: 18px; }
