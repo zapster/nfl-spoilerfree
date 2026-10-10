@@ -116,6 +116,8 @@ contains the broader implementation plan.
   data in memory, and persists revealed game IDs in season-scoped local storage.
   There is no IndexedDB, data caching, refresh policy, or automated test suite
   yet.
+- `favicon.svg` is an original shield-and-football mark; the app does not use the
+  official NFL shield.
 - The `Manage data` dialog exports/imports revealed-game selections as JSON and
   can reset this app's saved reveal selections across seasons.
 - The current URLs point at the local 2025 fixture under
@@ -126,7 +128,14 @@ contains the broader implementation plan.
   regular-season week.
 - Scores are hidden by default. Individual scores toggle reveal/hide; the
   week control says `Reveal all` until all completed games are visible, then
-  says `All revealed` while remaining clickable to hide them.
+  says `All revealed` in green while remaining clickable to hide them; `Reveal
+  all` is red.
+- Schedule entry scrolls to the current week. Team names/logos open a nearly
+  full-screen regular-season game list, also initially scrolled to the current
+  week (or the nearest prior team week during a bye). Closing returns to the
+  original view, scroll position, and team control.
+- Mobile schedule and team-game matchups show logos/abbreviations without team
+  nickname text; team controls retain accessible full-name labels.
 - Standings use only revealed results. Teams with hidden completed results are
   marked as partial with an asterisk and highlighted rows. Streaks use `?` or
   `W?`/`L?` when their boundary cannot be known safely.

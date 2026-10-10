@@ -9,6 +9,7 @@ results by default.
 - `DECISIONS.md` - durable product and architecture decisions
 - `regular-season-mockup.html` - standalone schedule-view mockup
 - `index.html`, `app.js`, `styles.css` - initial data-backed site
+- `favicon.svg` - original shield-and-football browser icon
 - `data/fixtures/2025-mid-week-7/` - source-compatible test resources
 - `scripts/prepare_mid_week7_fixture.py` - regenerate the test snapshot
 
@@ -38,7 +39,8 @@ Entering Schedule scrolls to the current week. Team schedules open at the
 current week, or that team's nearest prior week during a bye.
 Click a team's name or logo in the schedule or standings to open a sheet
 listing its regular-season games. The sheet nearly fills the screen on desktop
-and mobile.
+and mobile. On mobile, matchup names are hidden to save space; logos and
+abbreviation fallbacks remain visible.
 
 ## Local Website and NFLverse Fixture
 

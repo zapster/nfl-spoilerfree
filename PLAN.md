@@ -10,9 +10,15 @@ the page should not need to be regenerated when source data changes.
 
 ## Current Repository State
 
-- The repository has no application scaffold yet.
-- `nfl_current_season_games_summary.md` and `PLAN.md` are the project documents.
-- There are no commits or existing implementation files.
+- The production app is dependency-free static HTML, CSS, and JavaScript in
+  `index.html`, `app.js`, and `styles.css`.
+- `regular-season-mockup.html` and `standings-mockup.html` are design references.
+- The default app data is the local 2025 mid-Week 7 fixture under
+  `data/fixtures/2025-mid-week-7/`.
+- `PLAN.md`, `DECISIONS.md`, `README.md`, and
+  `nfl_current_season_games_summary.md` contain project planning and handoff
+  information.
+- There is no automated JavaScript test suite yet.
 - The referenced issue URL was not publicly accessible from this workspace.
 
 ## Data Source
