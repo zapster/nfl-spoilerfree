@@ -1,7 +1,6 @@
 const DATA = {
   season: 2025,
-  gamesUrl: "./data/fixtures/2025-mid-week-7/games.csv",
-  teamsUrl: "./data/fixtures/2025-mid-week-7/teams_colors_logos.csv",
+  manifestUrl: "https://zapster.github.io/nfl-spoilerfree-data/manifest.json",
 };
 
 const APP_STORAGE_PREFIX = "nfl-spoiler-free:";
@@ -9,6 +8,12 @@ const REVEAL_STORAGE_PREFIX = `${APP_STORAGE_PREFIX}revealed:v1:`;
 const REVEAL_STORAGE_KEY = `${REVEAL_STORAGE_PREFIX}${DATA.season}`;
 const DATA_BACKUP_FORMAT = "nfl-spoiler-free-data";
 const DATA_BACKUP_VERSION = 1;
+const DATA_CACHE_DATABASE = "nfl-spoiler-free-data";
+const DATA_CACHE_STORE = "season-snapshots";
+const DATA_CACHE_KEY = String(DATA.season);
+const DATA_REVALIDATE_INTERVAL = 60 * 60 * 1000;
+
+let dataCacheDatabase;
 
 const state = {
   games: [],
@@ -81,19 +86,21 @@ function numberOrNull(value) {
   return Number.isFinite(number) ? number : null;
 }
 
-function normalizeTeams(rows) {
-  return new Map(rows.map((row) => {
-    const divisionParts = (row.team_division || "").split(" ");
-    return [row.team_abbr, {
-      abbreviation: row.team_abbr,
-      name: row.team_name || row.team_abbr,
-      nickname: row.team_nick || row.team_name || row.team_abbr,
-      conference: row.team_conf || divisionParts[0] || "",
-      division: divisionParts.slice(1).join(" ") || row.team_division || "",
-      colors: [row.team_color, row.team_color2].filter(Boolean),
-      logoUrl: row.team_logo_espn || row.team_logo_wikipedia || "",
-    }];
-  }));
+function normalizeTeams(rows, seasonTeams) {
+  return new Map(rows
+    .filter((row) => seasonTeams.has(row.team_abbr))
+    .map((row) => {
+      const divisionParts = (row.team_division || "").split(" ");
+      return [row.team_abbr, {
+        abbreviation: row.team_abbr,
+        name: row.team_name || row.team_abbr,
+        nickname: row.team_nick || row.team_name || row.team_abbr,
+        conference: row.team_conf || divisionParts[0] || "",
+        division: divisionParts.slice(1).join(" ") || row.team_division || "",
+        colors: [row.team_color, row.team_color2].filter(Boolean),
+        logoUrl: row.team_logo_espn || row.team_logo_wikipedia || "",
+      }];
+    }));
 }
 
 function normalizeGames(rows) {
@@ -841,18 +848,164 @@ function render({ scrollToCurrentWeek = false } = {}) {
 }
 
 async function loadData() {
-  const responses = await Promise.all([fetch(DATA.gamesUrl), fetch(DATA.teamsUrl)]);
-  responses.forEach((response) => {
-    if (!response.ok) throw new Error(`Data request failed: ${response.status} ${response.statusText}`);
+  let cachedSnapshot = null;
+  try {
+    cachedSnapshot = await readCachedSeason();
+  } catch {
+    // IndexedDB is an optional cache; data can still load from the network.
+  }
+
+  if (cachedSnapshot) {
+    try {
+      applySeasonSnapshot(cachedSnapshot);
+      const cacheAge = Date.now() - cachedSnapshot.checkedAt;
+      if (!Number.isFinite(cacheAge) || cacheAge < 0 || cacheAge >= DATA_REVALIDATE_INTERVAL) {
+        refreshSeasonSnapshot(cachedSnapshot)
+          .then((snapshot) => {
+            if (snapshot.gamesCsv === cachedSnapshot.gamesCsv
+              && snapshot.teamsCsv === cachedSnapshot.teamsCsv) return;
+            applySeasonSnapshot(snapshot);
+            render();
+          })
+          .catch(() => {
+            // Keep the last usable snapshot when refresh fails or the browser is offline.
+          });
+      }
+      return;
+    } catch {
+      cachedSnapshot = null;
+    }
+  }
+
+  applySeasonSnapshot(await refreshSeasonSnapshot(cachedSnapshot));
+}
+
+function openDataCache() {
+  if (!window.indexedDB) return Promise.reject(new Error("IndexedDB is unavailable"));
+  if (!dataCacheDatabase) {
+    dataCacheDatabase = new Promise((resolve, reject) => {
+      const request = window.indexedDB.open(DATA_CACHE_DATABASE, 1);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains(DATA_CACHE_STORE)) {
+          request.result.createObjectStore(DATA_CACHE_STORE, { keyPath: "season" });
+        }
+      };
+      request.onsuccess = () => {
+        request.result.onversionchange = () => request.result.close();
+        resolve(request.result);
+      };
+      request.onerror = () => reject(request.error);
+      request.onblocked = () => reject(new Error("The data cache is blocked by another tab"));
+    });
+  }
+  return dataCacheDatabase;
+}
+
+async function readCachedSeason() {
+  const database = await openDataCache();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(DATA_CACHE_STORE, "readonly");
+    const request = transaction.objectStore(DATA_CACHE_STORE).get(DATA_CACHE_KEY);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+    transaction.onabort = () => reject(transaction.error);
   });
-  const [gamesText, teamsText] = await Promise.all(responses.map((response) => response.text()));
-  state.games = normalizeGames(parseCsv(gamesText));
-  state.teams = normalizeTeams(parseCsv(teamsText));
-  if (state.games.length === 0 || state.teams.size === 0) throw new Error("NFL data was empty");
+}
+
+async function writeCachedSeason(snapshot) {
+  const database = await openDataCache();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(DATA_CACHE_STORE, "readwrite");
+    transaction.objectStore(DATA_CACHE_STORE).put({ ...snapshot, season: DATA_CACHE_KEY });
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
+
+function publishedResourceUrl(path) {
+  if (typeof path !== "string" || !path || path.startsWith("/") || path.includes("..")) {
+    throw new Error("The data manifest contains an invalid file path.");
+  }
+  const baseUrl = new URL(".", DATA.manifestUrl);
+  const resourceUrl = new URL(path, baseUrl);
+  if (resourceUrl.origin !== baseUrl.origin || !resourceUrl.pathname.startsWith(baseUrl.pathname)) {
+    throw new Error("The data manifest points outside the published data repository.");
+  }
+  return resourceUrl.href;
+}
+
+function validatePublishedResource(resource) {
+  if (!resource || typeof resource.sha256 !== "string"
+    || !/^[a-f\d]{64}$/i.test(resource.sha256)) {
+    throw new Error("The data manifest is missing a valid file digest.");
+  }
+  return publishedResourceUrl(resource.path);
+}
+
+async function fetchCsvResource(resource) {
+  const response = await fetch(validatePublishedResource(resource));
+  if (!response.ok) {
+    throw new Error(`Data request failed: ${response.status} ${response.statusText}`);
+  }
+  const csv = await response.text();
+  if (!csv.trim()) throw new Error("NFL data was empty");
+  return csv;
+}
+
+async function refreshSeasonSnapshot(cachedSnapshot) {
+  const response = await fetch(DATA.manifestUrl, { cache: "no-cache" });
+  if (!response.ok) {
+    throw new Error(`Data manifest request failed: ${response.status} ${response.statusText}`);
+  }
+  const manifest = await response.json();
+  const gameResource = manifest.seasons?.[String(DATA.season)];
+  const teamsResource = manifest.teams;
+  validatePublishedResource(gameResource);
+  validatePublishedResource(teamsResource);
+
+  const cachedManifest = cachedSnapshot?.manifest;
+  const cachedGamesResource = cachedManifest?.seasons?.[String(DATA.season)];
+  const gamesUnchanged = cachedGamesResource?.sha256 === gameResource.sha256
+    && typeof cachedSnapshot.gamesCsv === "string";
+  const teamsUnchanged = cachedManifest?.teams?.sha256 === teamsResource.sha256
+    && typeof cachedSnapshot.teamsCsv === "string";
+  const [gamesCsv, teamsCsv] = await Promise.all([
+    gamesUnchanged ? cachedSnapshot.gamesCsv : fetchCsvResource(gameResource),
+    teamsUnchanged ? cachedSnapshot.teamsCsv : fetchCsvResource(teamsResource),
+  ]);
+  const snapshot = {
+    manifest,
+    gamesCsv,
+    teamsCsv,
+    checkedAt: Date.now(),
+  };
+  normalizeSeasonSnapshot(snapshot);
+  try {
+    await writeCachedSeason(snapshot);
+  } catch {
+    // A cache write failure does not prevent using the downloaded data.
+  }
+  return snapshot;
+}
+
+function applySeasonSnapshot(snapshot) {
+  const { games, teams } = normalizeSeasonSnapshot(snapshot);
+
+  state.games = games;
+  state.teams = teams;
   restoreRevealedGames();
   const completedWeeks = state.games.filter((game) => game.status === "final").map((game) => game.week);
   state.currentWeek = Math.max(...completedWeeks);
   state.expandedWeeks.add(state.currentWeek);
+}
+
+function normalizeSeasonSnapshot(snapshot) {
+  const games = normalizeGames(parseCsv(snapshot.gamesCsv));
+  const seasonTeams = new Set(games.flatMap((game) => [game.awayTeam, game.homeTeam]));
+  const teams = normalizeTeams(parseCsv(snapshot.teamsCsv), seasonTeams);
+  if (games.length === 0 || teams.size === 0) throw new Error("NFL data was empty");
+  return { games, teams };
 }
 
 document.querySelectorAll(".view-tab").forEach((tab) => {

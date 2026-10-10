@@ -72,22 +72,30 @@ contains the broader implementation plan.
 ## Data Loading and Caching
 
 - The deployed site should remain static HTML and JavaScript.
-- The browser fetches nflverse data directly; page regeneration is not needed
-  when scores change.
-- Schedule and result data come from the nflverse schedules release:
+- The browser reads published static snapshots from
+  https://zapster.github.io/nfl-spoilerfree-data/manifest.json. Its manifest
+  points to immutable, hash-versioned CSV files; no app page regeneration is
+  needed when the dataset changes.
+- For now, the app loads only the 2025 season and filters its source-schema game
+  CSV to regular-season (`REG`) games.
+- The data repository generates its snapshots from the nflverse schedules
+  release:
   https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv
-- Team names, divisions, colors, and logos come from the nflverse teams
+- Team names, divisions, colors, and logos originate from the nflverse teams
   metadata release:
   https://github.com/nflverse/nflverse-data/releases/download/teams/teams_colors_logos.csv
-- Planned: use IndexedDB for structured persistent data once caching is
-  implemented.
-- Results and game status have an initial one-hour TTL.
-- Schedule metadata and team metadata have an initial six-month TTL.
+- The upstream data is licensed under CC BY 4.0 and attributed to nflverse-data
+  contributors.
+- Cache the manifest and CSV snapshot in IndexedDB, separately from user reveal
+  selections in local storage.
+- Render cached data immediately. On a visit with a cache at least one hour old,
+  revalidate the manifest in the background, fetch CSVs only when their
+  manifest digest changes, and keep the last usable snapshot if refresh fails or
+  the browser is offline.
+- Fall back to network loading if IndexedDB is unavailable.
 - Standings are derived from current results rather than persisted initially.
-- Use stale-while-revalidate behavior and retain stale cached data when a
-  refresh fails or the browser is offline.
-- Direct browser loading depends on the selected nflverse endpoints allowing
-  CORS requests.
+- The published GitHub Pages data files were verified to allow cross-origin
+  browser reads with `Access-Control-Allow-Origin: *`.
 
 ## Team Presentation
 
@@ -112,20 +120,17 @@ contains the broader implementation plan.
 - The production entry point is `index.html`; the two `*-mockup.html` files
   remain static design references.
 - The implementation is dependency-free static HTML, CSS, and JavaScript.
-- `app.js` fetches the configured games and team CSVs directly, keeps normalized
-  data in memory, and persists revealed game IDs in season-scoped local storage.
-  There is no IndexedDB, data caching, refresh policy, or automated test suite
-  yet.
+- `app.js` reads the published manifest and 2025 CSVs, caches their snapshot in
+  IndexedDB, and persists revealed game IDs in season-scoped local storage.
+  The manifest is revalidated hourly; CSVs are fetched again only when their
+  manifest digest changes.
 - `favicon.svg` is an original shield-and-football mark; the app does not use the
   official NFL shield.
 - The `Manage data` dialog exports/imports revealed-game selections as JSON and
   can reset this app's saved reveal selections across seasons.
-- The current URLs point at the local 2025 fixture under
-  `data/fixtures/2025-mid-week-7/`. To test live NFLverse data, change only
-  `DATA.gamesUrl` and `DATA.teamsUrl` in `app.js`, subject to source CORS.
-- The fixture represents immediately after the Week 7 Thursday game. The
-  browser therefore identifies Week 7 as current from the latest completed
-  regular-season week.
+- The live data source is documented in `README.md`. The local Week 7 fixture
+  under `data/fixtures/2025-mid-week-7/` is retained for test-data regeneration
+  and is not loaded by the app.
 - Scores are hidden by default. Individual scores toggle reveal/hide; the
   week control says `Reveal all` until all completed games are visible, then
   says `All revealed` in green while remaining clickable to hide them; `Reveal
@@ -155,6 +160,4 @@ contains the broader implementation plan.
 - Exact current-season boundary policy.
 - Basic standings ordering versus official NFL tie-breakers.
 - Whether team logo assets should eventually be mirrored locally.
-- Whether IndexedDB caching should be added and how stale data should be
-  presented.
 - Whether playoff data should be added to the production UI next.
