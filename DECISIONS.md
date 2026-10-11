@@ -38,8 +38,11 @@ contains the broader implementation plan.
 - Import merges and deduplicates revealed IDs with existing selections.
 - Only IDs matching completed games in the loaded season are restored as
   revealed.
-- Reset asks for confirmation and clears only this app's saved data across all
-  seasons, not unrelated browser storage.
+- Reset asks for confirmation and clears this app's reveal selections across all
+  seasons and its saved season preference, not unrelated browser storage.
+- Clear cache removes the cached manifest and all season snapshots from
+  IndexedDB without changing reveal selections or the current page's in-memory
+  data.
 
 ## Team Game Drilldown
 
@@ -91,6 +94,9 @@ contains the broader implementation plan.
   contributors.
 - Cache the manifest and per-season CSV snapshots in IndexedDB, separately from
   the selected-season preference and user reveal selections in local storage.
+- Use `cache: "no-store"` for source requests so IndexedDB is the app-managed
+  persistent cache; allow users to clear its manifest and season snapshots.
+- After users clear the cache, normal app use may populate it again.
 - Reuse the cached manifest for up to one hour, then revalidate it on page load
   with the cached manifest as an offline fallback. If a selected season's
   digest changed, render its cached snapshot while refreshing the CSVs and keep

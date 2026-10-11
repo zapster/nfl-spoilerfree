@@ -56,10 +56,17 @@
             <input id="import-data" type="file" accept="application/json,.json">
           </label>
         </section>
+        <section class="data-action data-cache">
+          <div>
+            <h3>Clear downloaded data cache</h3>
+            <p>Remove the cached manifest and season CSVs from IndexedDB. The current view stays loaded; data is downloaded and cached again as needed.</p>
+          </div>
+          <button class="data-action-button" id="clear-cache" type="button">Clear cache</button>
+        </section>
         <section class="data-action data-reset">
           <div>
             <h3>Reset saved selections</h3>
-            <p>Remove revealed-game selections for every season from this browser. The downloaded schedule cache is retained.</p>
+            <p>Remove revealed-game selections for every season and the saved season choice from this browser. The downloaded schedule cache is retained.</p>
           </div>
           <button class="data-action-button danger-button" id="reset-data" type="button">Reset selections</button>
         </section>

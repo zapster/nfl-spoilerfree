@@ -13,6 +13,7 @@ const DATA_CACHE_STORE = "season-snapshots";
 const DATA_REVALIDATE_INTERVAL = 60 * 60 * 1000;
 
 let dataCacheDatabase;
+let dataCacheGeneration = 0;
 
 const state = {
   games: [],
@@ -278,7 +279,9 @@ function resetSavedData() {
   try {
     for (let index = localStorage.length - 1; index >= 0; index -= 1) {
       const key = localStorage.key(index);
-      if (key?.startsWith(REVEAL_STORAGE_PREFIX)) localStorage.removeItem(key);
+      if (key?.startsWith(REVEAL_STORAGE_PREFIX) || key === SELECTED_SEASON_STORAGE_KEY) {
+        localStorage.removeItem(key);
+      }
     }
   } catch {
     cleared = false;
@@ -342,16 +345,29 @@ document.querySelector("#import-data").addEventListener("change", async (event) 
   }
 });
 
+document.querySelector("#clear-cache").addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  try {
+    await clearDataCache();
+    setDataStatus("The cached manifest and season data were cleared. The current view remains loaded.");
+  } catch {
+    setDataStatus("The cached manifest and season data could not be cleared.", true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
 document.querySelector("#reset-data").addEventListener("click", () => {
   const confirmed = window.confirm(
-    "Reset all saved NFL Spoiler-Free reveal selections in this browser? This cannot be undone.",
+    "Reset saved reveal selections and the saved season choice in this browser? This cannot be undone.",
   );
   if (!confirmed) return;
 
   const cleared = resetSavedData();
   setDataStatus(cleared
-    ? "All saved reveal selections were cleared."
-    : "The current selection was cleared, but browser storage could not be fully cleared.", !cleared);
+    ? "Saved reveal selections and season choice were cleared."
+    : "The current selections were cleared, but browser storage could not be fully cleared.", !cleared);
 });
 
 document.querySelector("#close-team-dialog").addEventListener("click", () => teamDialog.close());
@@ -887,8 +903,18 @@ function saveSelectedSeason(season) {
   }
 }
 
+function clearSelectedSeason() {
+  try {
+    localStorage.removeItem(SELECTED_SEASON_STORAGE_KEY);
+  } catch {
+    return false;
+  }
+  return true;
+}
+
 async function loadData() {
-  publishedManifest = await loadManifest();
+  const cacheGeneration = dataCacheGeneration;
+  publishedManifest = await loadManifest(cacheGeneration);
   const seasons = availableSeasons(publishedManifest);
   if (seasons.length === 0) throw new Error("No regular-season data is available");
 
@@ -901,19 +927,20 @@ async function loadData() {
 
   const savedSeason = readSelectedSeason();
   DATA.season = seasons.includes(savedSeason) ? savedSeason : seasons[0];
+  if (savedSeason !== null && !seasons.includes(savedSeason)) clearSelectedSeason();
   seasonSelect.value = String(DATA.season);
-  saveSelectedSeason(DATA.season);
-  await loadSeasonData(DATA.season, publishedManifest);
+  await loadSeasonData(DATA.season, publishedManifest, cacheGeneration);
   seasonSelect.disabled = false;
 }
 
-async function loadManifest() {
+async function loadManifest(cacheGeneration = dataCacheGeneration) {
   let cachedRecord = null;
   try {
     cachedRecord = await readCacheRecord("manifest");
   } catch {
     // IndexedDB is an optional cache; data can still load from the network.
   }
+  if (cacheGeneration !== dataCacheGeneration) cachedRecord = null;
 
   const cachedManifest = cachedRecord?.manifest;
   const cacheAge = Date.now() - cachedRecord?.checkedAt;
@@ -922,7 +949,7 @@ async function loadManifest() {
   if (cacheIsFresh && availableSeasons(cachedManifest).length) return cachedManifest;
 
   try {
-    const response = await fetch(DATA.manifestUrl, { cache: "no-cache" });
+    const response = await fetch(DATA.manifestUrl, { cache: "no-store" });
     if (!response.ok) {
       throw new Error(`Data manifest request failed: ${response.status} ${response.statusText}`);
     }
@@ -935,7 +962,7 @@ async function loadManifest() {
         season: "manifest",
         manifest,
         checkedAt: Date.now(),
-      });
+      }, cacheGeneration);
     } catch {
       // A cache write failure does not prevent using the downloaded manifest.
     }
@@ -957,7 +984,7 @@ async function loadManifest() {
           season: "manifest",
           manifest: legacySnapshot.manifest,
           checkedAt: legacySnapshot.checkedAt,
-        });
+        }, cacheGeneration);
       } catch {
         // The legacy manifest can still be used for this page load.
       }
@@ -967,13 +994,14 @@ async function loadManifest() {
   }
 }
 
-async function loadSeasonData(season, manifest) {
+async function loadSeasonData(season, manifest, cacheGeneration = dataCacheGeneration) {
   let cachedSnapshot = null;
   try {
     cachedSnapshot = await readCachedSeason(season);
   } catch {
     // IndexedDB is an optional cache; data can still load from the network.
   }
+  if (cacheGeneration !== dataCacheGeneration) cachedSnapshot = null;
 
   if (cachedSnapshot) {
     try {
@@ -991,7 +1019,7 @@ async function loadSeasonData(season, manifest) {
   if (cachedDataIsCurrent) return;
 
   if (cachedSnapshot) {
-    refreshSeasonSnapshot(season, manifest, cachedSnapshot)
+    refreshSeasonSnapshot(season, manifest, cachedSnapshot, cacheGeneration)
       .then((snapshot) => {
         if (DATA.season !== season) return;
         applySeasonSnapshot(snapshot, season);
@@ -1003,7 +1031,7 @@ async function loadSeasonData(season, manifest) {
     return;
   }
 
-  const snapshot = await refreshSeasonSnapshot(season, manifest, cachedSnapshot);
+  const snapshot = await refreshSeasonSnapshot(season, manifest, cachedSnapshot, cacheGeneration);
   if (DATA.season === season) applySeasonSnapshot(snapshot, season);
 }
 
@@ -1039,8 +1067,9 @@ async function readCacheRecord(key) {
   });
 }
 
-async function writeCacheRecord(record) {
+async function writeCacheRecord(record, cacheGeneration = dataCacheGeneration) {
   const database = await openDataCache();
+  if (cacheGeneration !== dataCacheGeneration) return false;
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(DATA_CACHE_STORE, "readwrite");
     transaction.objectStore(DATA_CACHE_STORE).put({ ...record, season: String(record.season) });
@@ -1054,8 +1083,16 @@ function readCachedSeason(season) {
   return readCacheRecord(season);
 }
 
-function writeCachedSeason(snapshot) {
-  return writeCacheRecord(snapshot);
+async function clearDataCache() {
+  dataCacheGeneration += 1;
+  const database = await openDataCache();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(DATA_CACHE_STORE, "readwrite");
+    transaction.objectStore(DATA_CACHE_STORE).clear();
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
 }
 
 function cachedResourceHash(snapshot, resourceType, season) {
@@ -1086,7 +1123,7 @@ function validatePublishedResource(resource) {
 }
 
 async function fetchCsvResource(resource) {
-  const response = await fetch(validatePublishedResource(resource));
+  const response = await fetch(validatePublishedResource(resource), { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Data request failed: ${response.status} ${response.statusText}`);
   }
@@ -1095,7 +1132,12 @@ async function fetchCsvResource(resource) {
   return csv;
 }
 
-async function refreshSeasonSnapshot(season, manifest, cachedSnapshot) {
+async function refreshSeasonSnapshot(
+  season,
+  manifest,
+  cachedSnapshot,
+  cacheGeneration = dataCacheGeneration,
+) {
   const gameResource = manifest.seasons?.[String(season)];
   const teamsResource = manifest.teams;
   validatePublishedResource(gameResource);
@@ -1119,7 +1161,7 @@ async function refreshSeasonSnapshot(season, manifest, cachedSnapshot) {
   };
   normalizeSeasonSnapshot(snapshot, season);
   try {
-    await writeCachedSeason(snapshot);
+    await writeCacheRecord(snapshot, cacheGeneration);
   } catch {
     // A cache write failure does not prevent using the downloaded data.
   }

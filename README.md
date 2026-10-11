@@ -26,7 +26,8 @@ restore the user's saved selection when it is still available. The app renders
 regular-season games and spoiler-safe standings for the selected season. Scores
 remain hidden until revealed individually or for a whole week. Revealed game
 selections persist in season-specific `localStorage`; the **Manage data** dialog
-exports, imports, and resets those selections. JSON backups do not include the
+exports and imports those selections, resets reveals and the saved season
+choice, and can clear the downloaded-data cache. JSON backups do not include the
 downloaded schedule or scores. Team names and logos open a dialog listing that
 team's regular-season games.
 
@@ -68,8 +69,11 @@ fallback). CSVs are downloaded only when their published digest changes. A
 cached season snapshot is shown while changed files refresh, and remains
 available if a refresh fails or the browser is offline. If IndexedDB is
 unavailable, the app still attempts a normal network load. The downloaded
-source cache is not included in JSON backups or cleared when resetting reveal
-selections.
+source cache is not included in JSON backups. **Clear cache** removes the
+manifest and all per-season snapshots from IndexedDB; **Reset saved selections**
+removes reveal selections and the saved season preference from local storage.
+Using the app after clearing its cache will download and cache data again as
+needed.
 
 ## Local Website and Test Fixture
 
