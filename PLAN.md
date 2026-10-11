@@ -12,8 +12,8 @@ the page should not need to be regenerated when source data changes.
 
 - The production app is dependency-free static HTML, CSS, and JavaScript in
   `index.html`, `app.js`, and `styles.css`.
-- The default app data is the local 2025 mid-Week 7 fixture under
-  `data/fixtures/2025-mid-week-7/`.
+- The app loads season data and team metadata from the published nflverse-derived
+  dataset described in `README.md`.
 - `PLAN.md`, `DECISIONS.md`, `README.md`, and
   `nfl_current_season_games_summary.md` contain project planning and handoff
   information.
@@ -90,10 +90,7 @@ standings model while retaining the source values where useful. Logos and
 colors are presentation metadata and must not be required to calculate game
 results or standings. Missing assets should have a text-based fallback.
 
-When team metadata is captured as a test fixture, record its source URL,
-retrieval timestamp, source revision, and generated-fixture hash alongside the
-schedule fixture. Runtime cache entries should retain the source URL and
-retrieval timestamp even when no generated file is produced.
+Runtime cache entries should retain the source URL and retrieval timestamp.
 
 ## Data Delivery Strategy
 
@@ -246,18 +243,8 @@ espn
 ftn
 ```
 
-The 2025 data should be filtered and stored as a reproducible test fixture.
-The fixture should record:
-
-- Source URL
-- Retrieval timestamp
-- Source revision or release information
-- Hash of the generated fixture
-- Number of records
-- Whether postseason games are included
-
-Because all 2025 games are completed, synthetic scheduled games with null
-scores should also be added for testing future-game behavior.
+All 2025 games are completed. Tests for future-game behavior should use
+synthetic scheduled records with null scores.
 
 ## Normalized Application Model
 
@@ -441,8 +428,8 @@ A normalized team standing may look like:
 }
 ```
 
-Standings should be derived from normalized game data so the same fixture
-can exercise both the schedule and standings views.
+Standings should be derived from normalized game data so the same game data
+supports both the schedule and standings views.
 
 ## Current-Season Logic
 
@@ -468,8 +455,8 @@ The helper must be tested around:
 - December
 - Explicit historical dates
 
-Test data loading should allow an explicit season override so the 2025
-fixture can be used regardless of the system date.
+Test data loading should allow an explicit season override so behavior can be
+verified independently of the system date.
 
 ## Milestones
 
@@ -479,7 +466,7 @@ Scope:
 
 - Choose and initialize the application stack.
 - Define the normalized `Game` model.
-- Add the 2025 fixture and synthetic scheduled records.
+- Include synthetic scheduled records for future-game behavior.
 - Implement current-season calculation.
 - Render the regular-season schedule view.
 - Render a basic conference/division standings view.
@@ -487,12 +474,10 @@ Scope:
 Acceptance criteria:
 
 - The app runs locally.
-- Fixture data loads without contacting nflverse.
 - Games are grouped by week.
 - Future and completed games are represented.
 - Regular-season standings are grouped by conference and division.
 - The season calculation is dynamic.
-- The 2025 fixture can be selected explicitly.
 
 ### Milestone 2: Browser Data Loading
 

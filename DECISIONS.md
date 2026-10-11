@@ -129,9 +129,7 @@ contains the broader implementation plan.
   official NFL shield.
 - The `Manage data` dialog exports/imports revealed-game selections as JSON and
   can reset this app's saved reveal selections across seasons.
-- The live data source is documented in `README.md`. The local Week 7 fixture
-  under `data/fixtures/2025-mid-week-7/` is retained for test-data regeneration
-  and is not loaded by the app.
+- The live data source is documented in `README.md`.
 - Scores are hidden by default. Individual scores toggle reveal/hide; the
   week control says `Reveal all` until all completed games are visible, then
   says `All revealed` in green while remaining clickable to hide them; `Reveal

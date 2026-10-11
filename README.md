@@ -34,8 +34,6 @@ review concerns in good faith and work to resolve them.
 - `DECISIONS.md` - durable product and architecture decisions
 - `index.html`, `app.js`, `styles.css` - data-backed site
 - `favicon.svg` - original shield-and-football browser icon
-- `data/fixtures/2025-mid-week-7/` - source-compatible test resources
-- `scripts/prepare_mid_week7_fixture.py` - regenerate the test snapshot
 
 ## Review
 
@@ -98,7 +96,7 @@ removes reveal selections and the saved season preference from local storage.
 Using the app after clearing its cache will download and cache data again as
 needed.
 
-## Local Website and Test Fixture
+## Local Website
 
 Start the local static server from the repository root:
 
@@ -109,14 +107,3 @@ python3 -m http.server 8787
 The website is then available at:
 
 - `http://127.0.0.1:8787/`
-
-The files in `data/fixtures/2025-mid-week-7/` are a test snapshot taken just
-after the Week 7 Thursday game on October 16, 2025. They are not used by the
-application. Their manifest records fixture provenance, and the unmodified
-source downloads are retained under `data/source/` for regeneration.
-
-To regenerate after downloading newer source files:
-
-```sh
-python3 scripts/prepare_mid_week7_fixture.py
-```
