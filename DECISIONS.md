@@ -11,6 +11,11 @@ This file records product and implementation decisions for the current app.
 - The regular-season schedule renders every regular-season week.
 - The current week is expanded by default; all other weeks start collapsed as
   compact clickable banners.
+- Determine the current week from published game dates in the `America/New_York`
+  time zone, independent of whether any results are final. Do not label a week
+  current before the season's first game date or after its final game date.
+- Outside the season's date range, expand and scroll to the opening week before
+  the season, or the final week after it, without a current-week label.
 - Entering the Schedule view scrolls to the current week.
 - Week expansion state is kept in memory across renders, but not persisted.
 - A `Manage data` action beside the season picker opens data import, export, and

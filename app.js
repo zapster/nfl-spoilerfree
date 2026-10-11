@@ -24,6 +24,7 @@ const state = {
   view: window.location.hash === "#standings" ? "standings" : "schedule",
   conference: "AFC",
   currentWeek: null,
+  focusWeek: null,
 };
 
 const loading = document.querySelector("#loading");
@@ -426,6 +427,38 @@ function formatWeekDate(games) {
   return `${firstLabel} - ${lastLabel}`;
 }
 
+function scheduleWeekTargets(games) {
+  const rangesByWeek = new Map();
+  games.forEach((game) => {
+    if (!Number.isInteger(game.week) || !/^\d{4}-\d{2}-\d{2}$/.test(game.date || "")) return;
+    const range = rangesByWeek.get(game.week) || { week: game.week, start: game.date, end: game.date };
+    range.start = game.date < range.start ? game.date : range.start;
+    range.end = game.date > range.end ? game.date : range.end;
+    rangesByWeek.set(game.week, range);
+  });
+
+  const weeks = [...rangesByWeek.values()].sort((left, right) => left.start.localeCompare(right.start));
+  if (weeks.length === 0) return { currentWeek: null, focusWeek: null };
+
+  const dateParts = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date()).map(({ type, value }) => [type, value]));
+  const today = `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
+  const firstWeek = weeks[0];
+  const finalWeek = weeks.at(-1);
+  const currentWeek = today < firstWeek.start || today > finalWeek.end
+    ? null
+    : weeks.filter((week) => week.start <= today).at(-1)?.week ?? null;
+
+  return {
+    currentWeek,
+    focusWeek: currentWeek ?? (today < firstWeek.start ? firstWeek.week : finalWeek.week),
+  };
+}
+
 function formatTime(time) {
   if (!time) return "Time TBD";
   const [hours, minutes] = time.split(":").map(Number);
@@ -568,9 +601,12 @@ function openTeamGames(abbreviation, trigger) {
 
 function scrollTeamGamesToCurrent() {
   const weeks = [...teamGamesList.querySelectorAll(".team-week")];
-  const target = weeks.find((week) => Number(week.dataset.week) === state.currentWeek)
-    || weeks.filter((week) => Number(week.dataset.week) <= state.currentWeek).at(-1)
-    || weeks[0];
+  const targetWeek = state.currentWeek ?? state.focusWeek;
+  const target = targetWeek === null
+    ? weeks[0]
+    : weeks.find((week) => Number(week.dataset.week) === targetWeek)
+      || weeks.filter((week) => Number(week.dataset.week) <= targetWeek).at(-1)
+      || weeks[0];
   if (!target) return;
 
   teamGamesList.scrollTop += target.getBoundingClientRect().top - teamGamesList.getBoundingClientRect().top;
@@ -637,6 +673,9 @@ function scheduleView() {
   const completedGames = state.games.filter((game) => game.status === "final");
   const unrevealedGames = completedGames.filter((game) => !state.revealed.has(game.id));
   const allRevealed = completedGames.length > 0 && unrevealedGames.length === 0;
+  const currentWeekNote = state.currentWeek === null
+    ? "Results hidden by default"
+    : `Week ${state.currentWeek} is current <span aria-hidden="true">•</span> Results hidden by default`;
   const section = document.createElement("section");
   section.className = "page-section";
   section.innerHTML = `
@@ -644,7 +683,7 @@ function scheduleView() {
       <div>
         <p class="eyebrow">${DATA.season} regular season</p>
         <h1>Schedule</h1>
-        <p class="intro">Week ${state.currentWeek} is current <span aria-hidden="true">•</span> Results hidden by default</p>
+        <p class="intro">${currentWeekNote}</p>
       </div>
       <div class="schedule-tools">
         <button class="uncover-all season-uncover-all" type="button"></button>
@@ -683,6 +722,7 @@ function scheduleView() {
     const remainingResults = completedGames.filter((game) => !state.revealed.has(game.id));
     const week = document.createElement("details");
     week.className = `week-block${weekNumber === state.currentWeek ? " is-current" : ""}`;
+    week.dataset.week = String(weekNumber);
     week.open = state.expandedWeeks.has(weekNumber);
     week.addEventListener("toggle", () => {
       if (week.open) {
@@ -918,7 +958,11 @@ function render({ scrollToCurrentWeek = false } = {}) {
   content.replaceChildren(state.view === "schedule" ? scheduleView() : standingsView());
   content.hidden = false;
   if (scrollToCurrentWeek && state.view === "schedule") {
-    window.requestAnimationFrame(() => content.querySelector(".week-block.is-current")?.scrollIntoView({ block: "start" }));
+    window.requestAnimationFrame(() => {
+      [...content.querySelectorAll(".week-block")]
+        .find((week) => Number(week.dataset.week) === state.focusWeek)
+        ?.scrollIntoView({ block: "start" });
+    });
   }
 }
 
@@ -1228,12 +1272,10 @@ function applySeasonSnapshot(snapshot, season = Number(snapshot.season) || DATA.
   state.games = games;
   state.teams = teams;
   restoreRevealedGames();
-  const completedWeeks = state.games.filter((game) => game.status === "final").map((game) => game.week);
-  const scheduledWeeks = state.games.map((game) => game.week);
-  state.currentWeek = completedWeeks.length
-    ? Math.max(...completedWeeks)
-    : Math.min(...scheduledWeeks);
-  state.expandedWeeks.add(state.currentWeek);
+  const weekTargets = scheduleWeekTargets(state.games);
+  state.currentWeek = weekTargets.currentWeek;
+  state.focusWeek = weekTargets.focusWeek;
+  if (state.focusWeek !== null) state.expandedWeeks.add(state.focusWeek);
 }
 
 function normalizeSeasonSnapshot(snapshot, season = Number(snapshot.season) || DATA.season) {
@@ -1262,6 +1304,7 @@ seasonSelect.addEventListener("change", () => {
   state.games = [];
   state.teams.clear();
   state.currentWeek = null;
+  state.focusWeek = null;
   state.expandedWeeks.clear();
   seasonSelect.disabled = true;
   error.hidden = true;
