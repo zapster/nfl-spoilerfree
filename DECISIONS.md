@@ -23,6 +23,8 @@ contains the broader implementation plan.
 - Each completed game has its own centered reveal/hide toggle.
 - A per-week `Reveal all` control may reveal every completed result in that
   week; scheduled games remain untouched.
+- The schedule has a season-wide `Reveal all` / `All revealed` toggle for all
+  completed games; scheduled games remain untouched.
 - Revealing one game must not reveal any other game.
 - Revealed game IDs persist in versioned `localStorage` keys scoped by season.
 - Restore only saved IDs that match currently completed games; new and scheduled

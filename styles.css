@@ -176,6 +176,8 @@ button.team:hover > span:not(.team-logo) { text-decoration: underline; text-deco
   margin-bottom: 24px;
 }
 
+.schedule-tools { display: flex; align-items: center; gap: 12px; }
+
 .eyebrow {
   margin: 0 0 7px;
   color: var(--red);
@@ -327,7 +329,8 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .app-shell { padding: 42px 0 54px; }
   .view-nav { align-items: flex-end; }
   .page-heading { display: block; }
-  .data-note { margin-top: 12px; }
+  .schedule-tools { flex-wrap: wrap; margin-top: 12px; }
+  .schedule-tools .data-note { margin-top: 0; }
   .week-summary-copy { display: block; }
   .week-date { display: block; margin-top: 4px; }
   .game-card { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 16px 14px; }

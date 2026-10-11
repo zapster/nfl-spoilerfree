@@ -609,6 +609,9 @@ function renderTeamGames(abbreviation, focusGameId = null) {
 
 function scheduleView() {
   const weeks = [...new Set(state.games.map((game) => game.week))].sort((left, right) => left - right);
+  const completedGames = state.games.filter((game) => game.status === "final");
+  const unrevealedGames = completedGames.filter((game) => !state.revealed.has(game.id));
+  const allRevealed = completedGames.length > 0 && unrevealedGames.length === 0;
   const section = document.createElement("section");
   section.className = "page-section";
   section.innerHTML = `
@@ -618,10 +621,35 @@ function scheduleView() {
         <h1>Schedule</h1>
         <p class="intro">Week ${state.currentWeek} is current <span aria-hidden="true">•</span> Results hidden by default</p>
       </div>
-      <div class="data-note">${weeks.length} weeks loaded</div>
+      <div class="schedule-tools">
+        <button class="uncover-all season-uncover-all" type="button"></button>
+        <div class="data-note">${weeks.length} weeks loaded</div>
+      </div>
     </div>
     <div class="week-stream" id="week-stream"></div>
   `;
+  const seasonUncoverAll = section.querySelector(".season-uncover-all");
+  seasonUncoverAll.classList.toggle("is-all-revealed", allRevealed);
+  seasonUncoverAll.textContent = unrevealedGames.length
+    ? "Reveal all"
+    : completedGames.length ? "All revealed" : "No results";
+  seasonUncoverAll.disabled = completedGames.length === 0;
+  seasonUncoverAll.title = completedGames.length === 0
+    ? "No completed scores are available in this season"
+    : allRevealed
+      ? "Click to hide all revealed scores in this season"
+      : "Reveal all completed scores in this season";
+  seasonUncoverAll.setAttribute("aria-label", seasonUncoverAll.title);
+  seasonUncoverAll.addEventListener("click", () => {
+    if (unrevealedGames.length) {
+      completedGames.forEach((game) => state.revealed.add(game.id));
+    } else {
+      completedGames.forEach((game) => state.revealed.delete(game.id));
+    }
+    persistRevealedGames();
+    render();
+  });
+
   const stream = section.querySelector("#week-stream");
   weeks.forEach((weekNumber) => {
     const games = state.games.filter((game) => game.week === weekNumber);

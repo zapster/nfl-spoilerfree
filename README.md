@@ -28,8 +28,9 @@ remain hidden until revealed individually or for a whole week. Revealed game
 selections persist in season-specific `localStorage`; the **Manage data** dialog
 exports and imports those selections, resets reveals and the saved season
 choice, and can clear the downloaded-data cache. JSON backups do not include the
-downloaded schedule or scores. Team names and logos open a dialog listing that
-team's regular-season games.
+downloaded schedule or scores. Schedule controls can reveal or hide all
+completed results for a week or the entire season. Team names and logos open a
+dialog listing that team's regular-season games.
 
 ## Data Source and Cache
 
