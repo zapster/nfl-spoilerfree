@@ -1,6 +1,6 @@
 # Project Decisions
 
-This file records decisions made during planning and mockup work. `PLAN.md`
+This file records decisions made during planning and implementation. `PLAN.md`
 contains the broader implementation plan.
 
 ## Product Structure
@@ -113,23 +113,12 @@ contains the broader implementation plan.
 - Use team logos where available.
 - Keep the team-color abbreviation box as a logo fallback.
 - Team identity must remain available as text when a logo fails to load.
-- The current standalone mockup uses preview ESPN CDN logo URLs; production
-  data should use the logo URLs from nflverse team metadata.
-
-## Current Mockup
-
-- File: `regular-season-mockup.html`
-- The mockup starts on Week 7.
-- Week 6 and Week 8 are included as hidden examples that can be expanded.
-- Schedule and Standings are the primary navigation at the top.
-- A season dropdown is aligned to the right of that navigation.
-- There is no top bar or introductory hero content.
-- The mockup uses sample data and is not connected to live nflverse data.
+- Use logo URLs from nflverse team metadata, with text and team-color
+  abbreviations as fallbacks when an image is unavailable.
 
 ## Current Implementation Handoff
 
-- The production entry point is `index.html`; the two `*-mockup.html` files
-  remain static design references.
+- The production entry point is `index.html`.
 - The implementation is dependency-free static HTML, CSS, and JavaScript.
 - `app.js` builds the season picker from the published manifest and loads the
   selected season's CSVs. It caches the manifest and per-season snapshots in

@@ -12,7 +12,6 @@ the page should not need to be regenerated when source data changes.
 
 - The production app is dependency-free static HTML, CSS, and JavaScript in
   `index.html`, `app.js`, and `styles.css`.
-- `regular-season-mockup.html` and `standings-mockup.html` are design references.
 - The default app data is the local 2025 mid-Week 7 fixture under
   `data/fixtures/2025-mid-week-7/`.
 - `PLAN.md`, `DECISIONS.md`, `README.md`, and
@@ -354,8 +353,8 @@ The schedule subview renders all regular-season weeks. The current week is
 expanded initially; other weeks use compact clickable summaries and can be
 expanded without leaving the page.
 
-The original mockup centers Week 7 and includes Week 6 and Week 8 as examples
-of the earlier adjacent-week expansion behavior.
+The initial schedule prototype centered Week 7, with Weeks 6 and 8 as examples
+of adjacent-week expansion.
 
 It should show:
 

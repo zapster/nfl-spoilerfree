@@ -1,7 +1,7 @@
 # NFL Spoiler-Free
 
-A dependency-free browser app and design mockup for browsing NFL regular-season
-games without revealing results by default.
+A dependency-free browser app for browsing NFL regular-season games without
+revealing results by default.
 
 ## Legal and Contact
 
@@ -32,7 +32,6 @@ review concerns in good faith and work to resolve them.
 
 - `PLAN.md` - product and implementation plan
 - `DECISIONS.md` - durable product and architecture decisions
-- `regular-season-mockup.html` - standalone schedule-view mockup
 - `index.html`, `app.js`, `styles.css` - data-backed site
 - `favicon.svg` - original shield-and-football browser icon
 - `data/fixtures/2025-mid-week-7/` - source-compatible test resources
@@ -40,10 +39,8 @@ review concerns in good faith and work to resolve them.
 
 ## Review
 
-Open `regular-season-mockup.html` directly in a browser to review the standalone
-design mockup. The production app is `index.html`; it has no build step or
-external JavaScript dependencies and loads its data from the public dataset
-described below.
+The production app is `index.html`; it has no build step or external JavaScript
+dependencies and loads its data from the public dataset described below.
 
 The season picker lists seasons with regular-season data in the manifest,
 newest first. The newest available season is selected on first use; later visits
