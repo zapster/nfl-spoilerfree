@@ -14,8 +14,7 @@ the page should not need to be regenerated when source data changes.
   `index.html`, `app.js`, and `styles.css`.
 - The app loads season data and team metadata from the published nflverse-derived
   dataset described in `README.md`.
-- `PLAN.md`, `DECISIONS.md`, `README.md`, and
-  `nfl_current_season_games_summary.md` contain project planning and handoff
+- `PLAN.md`, `DECISIONS.md`, and `README.md` contain project planning and handoff
   information.
 - There is no automated JavaScript test suite yet.
 - The referenced issue URL was not publicly accessible from this workspace.
