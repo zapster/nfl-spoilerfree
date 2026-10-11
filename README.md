@@ -3,6 +3,31 @@
 A dependency-free browser app and design mockup for browsing NFL regular-season
 games without revealing results by default.
 
+## Legal and Contact
+
+NFL Spoiler-Free is an unofficial personal hobby project, offered free of charge
+for enjoyment and not operated for profit. It is not affiliated with, endorsed
+by, or sponsored by the NFL, any NFL club, ESPN, or nflverse.
+
+NFL and team names, logos, and other marks belong to their respective rights
+holders (the NFL and/or its clubs, as applicable). They are used only to identify
+the teams discussed here; this project claims no ownership of them. Schedule and
+team metadata are sourced from nflverse releases and published via
+[`zapster/nfl-spoilerfree-data`](https://github.com/zapster/nfl-spoilerfree-data).
+The nflverse-data contributors' dataset is licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) and is attributed
+below. The app uses third-party logo URLs supplied in team metadata, preferring
+ESPN-hosted images and falling back to Wikipedia-hosted images. The dataset's
+license and this repository's [MIT software license](LICENSE) do not grant
+rights to those separate images or marks; their rights remain with their
+respective owners.
+
+For questions or corrections, please open a
+[GitHub issue](https://github.com/zapster/nfl-spoilerfree/issues). Issues are
+public. For a private concern, including a rights-related matter, use the contact
+information on [zapster.cc](https://zapster.cc/). I welcome reports and will
+review concerns in good faith and work to resolve them.
+
 ## Contents
 
 - `PLAN.md` - product and implementation plan
