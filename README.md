@@ -20,36 +20,15 @@ below. The app uses third-party logo URLs supplied in team metadata, preferring
 ESPN-hosted images and falling back to Wikipedia-hosted images. The dataset's
 license and this repository's [MIT software license](LICENSE) do not grant
 rights to those separate images or marks; their rights remain with their
-respective owners.
+respective owners. The browser favicon is an original design and does not use
+the official NFL shield.
 
-For questions or corrections, please open a
-[GitHub issue](https://github.com/zapster/nfl-spoilerfree/issues). Issues are
-public. For a private concern, including a rights-related matter, use the contact
+Bug reports, feature requests, and missing features are tracked in
+[GitHub Issues](https://github.com/zapster/nfl-spoilerfree/issues). Issues will
+be public when the repository is public, so do not include sensitive information.
+For a private concern, including a rights-related matter, use the contact
 information on [zapster.cc](https://zapster.cc/). I welcome reports and will
 review concerns in good faith and work to resolve them.
-
-## Contents
-
-- `DECISIONS.md` - durable product and architecture decisions
-- `index.html`, `app.js`, `styles.css` - data-backed site
-- `favicon.svg` - original shield-and-football browser icon
-
-## Review
-
-The production app is `index.html`; it has no build step or external JavaScript
-dependencies and loads its data from the public dataset described below.
-
-The season picker lists seasons with regular-season data in the manifest,
-newest first. The newest available season is selected on first use; later visits
-restore the user's saved selection when it is still available. The app renders
-regular-season games and spoiler-safe standings for the selected season. Scores
-remain hidden until revealed individually or for a whole week. Revealed game
-selections persist in season-specific `localStorage`; the **Manage data** dialog
-exports and imports those selections, resets reveals and the saved season
-choice, and can clear the downloaded-data cache. JSON backups do not include the
-downloaded schedule or scores. Schedule controls can reveal or hide all
-completed results for a week or the entire season. Team names and logos open a
-dialog listing that team's regular-season games.
 
 ## Data Source and Cache
 
