@@ -30,7 +30,6 @@ review concerns in good faith and work to resolve them.
 
 ## Contents
 
-- `PLAN.md` - product and implementation plan
 - `DECISIONS.md` - durable product and architecture decisions
 - `index.html`, `app.js`, `styles.css` - data-backed site
 - `favicon.svg` - original shield-and-football browser icon

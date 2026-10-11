@@ -1,7 +1,6 @@
 # Project Decisions
 
-This file records decisions made during planning and implementation. `PLAN.md`
-contains the broader implementation plan.
+This file records product and implementation decisions for the current app.
 
 ## Product Structure
 
