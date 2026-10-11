@@ -4,6 +4,7 @@ const DATA = {
 };
 
 const APP_STORAGE_PREFIX = "nfl-spoiler-free:";
+const STORAGE_NOTICE_ACCEPTED_KEY = `${APP_STORAGE_PREFIX}storage-notice-accepted:v1`;
 const SELECTED_SEASON_STORAGE_KEY = `${APP_STORAGE_PREFIX}selected-season:v1`;
 const REVEAL_STORAGE_PREFIX = `${APP_STORAGE_PREFIX}revealed:v1:`;
 const DATA_BACKUP_FORMAT = "nfl-spoiler-free-data";
@@ -28,6 +29,7 @@ const state = {
 const loading = document.querySelector("#loading");
 const error = document.querySelector("#error");
 const content = document.querySelector("#content");
+const storageNotice = document.querySelector("#storage-notice");
 const seasonSelect = document.querySelector("#season-select");
 const dataDialog = document.querySelector("#data-dialog");
 const dataStatus = document.querySelector("#data-status");
@@ -1288,13 +1290,47 @@ window.addEventListener("hashchange", () => {
   if (state.games.length) render({ scrollToCurrentWeek: state.view === "schedule" });
 });
 
-loadData()
-  .then(() => {
-    loading.hidden = true;
-    render({ scrollToCurrentWeek: state.view === "schedule" });
-  })
-  .catch((loadError) => {
-    loading.hidden = true;
-    error.textContent = `Unable to load NFL data. ${loadError.message}`;
-    error.hidden = false;
-  });
+function hasAcceptedStorageNotice() {
+  try {
+    return localStorage.getItem(STORAGE_NOTICE_ACCEPTED_KEY) === "accepted";
+  } catch {
+    return false;
+  }
+}
+
+function startApp() {
+  loading.textContent = "Loading NFL data...";
+  loadData()
+    .then(() => {
+      loading.hidden = true;
+      render({ scrollToCurrentWeek: state.view === "schedule" });
+    })
+    .catch((loadError) => {
+      loading.hidden = true;
+      error.textContent = `Unable to load NFL data. ${loadError.message}`;
+      error.hidden = false;
+    });
+}
+
+document.querySelector("#continue-storage-notice").addEventListener("click", () => {
+  try {
+    localStorage.setItem(STORAGE_NOTICE_ACCEPTED_KEY, "accepted");
+  } catch {
+    // The app can still run for this visit if browser storage is unavailable.
+  }
+  storageNotice.close();
+  startApp();
+});
+
+document.querySelector("#leave-storage-notice").addEventListener("click", () => {
+  window.location.replace("about:blank");
+});
+
+storageNotice.addEventListener("cancel", (event) => event.preventDefault());
+
+if (hasAcceptedStorageNotice()) {
+  startApp();
+} else {
+  loading.textContent = "Review the browser storage notice to continue.";
+  storageNotice.showModal();
+}

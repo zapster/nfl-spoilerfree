@@ -109,6 +109,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .data-action h3 { margin: 0 0 5px; font-size: 14px; }
 .data-action p { max-width: 350px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .data-action-button { flex: 0 0 auto; white-space: nowrap; }
+.storage-notice-dialog .data-dialog-content { padding-top: 14px; }
+.storage-notice-dialog .data-dialog-content p { margin-bottom: 14px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.storage-notice-dialog .data-dialog-content a { color: var(--ink); font-weight: 750; text-underline-offset: 3px; }
+.storage-notice-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.storage-notice-actions .data-action-button { min-height: 42px; }
 .data-import { align-items: flex-start; flex-direction: column; gap: 13px; }
 .file-picker { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
 .file-picker > span { display: inline-block; }
@@ -363,6 +368,8 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .manage-data-button { margin-bottom: 0; }
   .data-dialog-header { padding: 20px 20px 0; }
   .data-dialog-content { padding: 8px 20px 20px; }
+  .storage-notice-actions { flex-direction: column-reverse; }
+  .storage-notice-actions .data-action-button { width: 100%; }
   .data-action { align-items: stretch; flex-direction: column; gap: 12px; }
   .data-action-button { width: 100%; }
   .team-dialog { width: calc(100vw - 12px); height: calc(100dvh - 12px); max-width: none; max-height: none; border-radius: 14px; }

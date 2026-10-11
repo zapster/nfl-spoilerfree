@@ -30,6 +30,26 @@
     <div id="error" class="error-state" role="alert" hidden></div>
     <div id="content" hidden></div>
 
+    <dialog class="data-dialog storage-notice-dialog" id="storage-notice" aria-labelledby="storage-notice-title" aria-describedby="storage-notice-description">
+      <header class="data-dialog-header">
+        <div>
+          <p class="eyebrow">Before you continue</p>
+          <h2 id="storage-notice-title">Browser storage</h2>
+        </div>
+      </header>
+      <div class="data-dialog-content">
+        <div id="storage-notice-description">
+          <p>This app stores your selected season and revealed-game choices in local storage, and caches public schedule and team data in IndexedDB. Continuing also saves this acknowledgment in local storage so the notice is not shown on every visit. Preferences remain until you reset them or clear this site's browser data. Cached data can be cleared from Manage data.</p>
+          <p>We do not use analytics or advertising trackers. Your saved choices are not sent to the app operator. To load schedules and team logos, your browser contacts GitHub Pages and image hosts such as ESPN or Wikimedia; those hosts receive routine request information such as your IP address.</p>
+          <p>Continue allows this browser storage and opens the app. If you do not want browser storage, choose Leave page. <a href="https://github.com/zapster/nfl-spoilerfree#data-source-and-cache" target="_blank" rel="noopener noreferrer">Read more about data and browser storage</a>.</p>
+        </div>
+        <div class="storage-notice-actions">
+          <button class="data-action-button" id="leave-storage-notice" type="button">Leave page</button>
+          <button class="data-action-button" id="continue-storage-notice" type="button">Continue to app</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog class="data-dialog" id="data-dialog" aria-labelledby="data-dialog-title">
       <header class="data-dialog-header">
         <div>
