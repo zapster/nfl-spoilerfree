@@ -88,6 +88,18 @@ function numberOrNull(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function safeLogoUrl(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:"
+      || url.username || url.password || url.port
+      || !["a.espncdn.com", "upload.wikimedia.org"].includes(url.hostname)) return "";
+    return url.href;
+  } catch {
+    return "";
+  }
+}
+
 function normalizeTeams(rows, seasonTeams) {
   return new Map(rows
     .filter((row) => seasonTeams.has(row.team_abbr))
@@ -99,8 +111,8 @@ function normalizeTeams(rows, seasonTeams) {
         nickname: row.team_nick || row.team_name || row.team_abbr,
         conference: row.team_conf || divisionParts[0] || "",
         division: divisionParts.slice(1).join(" ") || row.team_division || "",
-        colors: [row.team_color, row.team_color2].filter(Boolean),
-        logoUrl: row.team_logo_espn || row.team_logo_wikipedia || "",
+        colors: [row.team_color, row.team_color2].filter((color) => /^#[\da-f]{6}$/i.test(color)),
+        logoUrl: safeLogoUrl(row.team_logo_espn) || safeLogoUrl(row.team_logo_wikipedia),
       }];
     }));
 }
@@ -434,7 +446,10 @@ function logoElement(team, size = "large") {
   const logo = document.createElement("span");
   logo.className = `team-logo team-logo-${size}`;
   logo.style.setProperty("--badge-color", team.colors[0] || "#697386");
-  logo.innerHTML = `<span class="team-logo-fallback">${team.abbreviation}</span>`;
+  const fallback = document.createElement("span");
+  fallback.className = "team-logo-fallback";
+  fallback.textContent = team.abbreviation;
+  logo.append(fallback);
 
   if (team.logoUrl) {
     const image = document.createElement("img");
@@ -474,7 +489,15 @@ function gameElement(game, onScoreChange = () => render()) {
 
   const time = document.createElement("div");
   time.className = "game-time";
-  time.innerHTML = `<strong class="${game.status === "final" ? "is-final" : "is-scheduled"}">${game.status === "final" ? "Final" : "Scheduled"}</strong>${game.weekday.slice(0, 3)}<br>${formatTime(game.time)}`;
+  const status = document.createElement("strong");
+  status.className = game.status === "final" ? "is-final" : "is-scheduled";
+  status.textContent = game.status === "final" ? "Final" : "Scheduled";
+  time.append(
+    status,
+    document.createTextNode(game.weekday.slice(0, 3)),
+    document.createElement("br"),
+    document.createTextNode(formatTime(game.time)),
+  );
 
   const matchup = document.createElement("div");
   matchup.className = "matchup";
@@ -870,12 +893,13 @@ function standingsView() {
     const card = document.createElement("section");
     card.className = "division";
     card.innerHTML = `
-      <div class="division-heading"><h2>${state.conference} ${division}</h2><span>W-L</span></div>
+      <div class="division-heading"><h2></h2><span>W-L</span></div>
       <table class="standings-table">
         <thead><tr><th scope="col">Team</th><th scope="col">W-L</th><th scope="col">Pct</th><th scope="col">Streak</th></tr></thead>
         <tbody></tbody>
       </table>
     `;
+    card.querySelector(".division-heading h2").textContent = `${state.conference} ${division}`;
     const body = card.querySelector("tbody");
     teams.forEach((team, index) => body.append(teamStandingElement(team, index)));
     grid.append(card);
