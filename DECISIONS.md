@@ -67,6 +67,8 @@ This file records product and implementation decisions for the current app.
 
 - Standings are calculated only from completed games whose results the user has
   revealed.
+- Winning percentage gives revealed ties half credit using
+  `(wins + 0.5 * ties) / gamesPlayed`.
 - A partial record must be labeled as a known or revealed record, not presented
   as the team's complete actual record.
 - If the latest completed game is unrevealed, show `?` for the streak.

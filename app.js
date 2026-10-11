@@ -829,6 +829,10 @@ function recordLabel(team) {
   return `${team.wins}-${team.losses}${team.ties ? `-${team.ties}` : ""}`;
 }
 
+function winningPercentage(team) {
+  return team.gamesPlayed ? (team.wins + 0.5 * team.ties) / team.gamesPlayed : 0;
+}
+
 function streakLabel(team) {
   if (team.history.length === 0) return "-";
   const latest = team.history.at(-1).result;
@@ -881,7 +885,7 @@ function teamStandingElement(team, index) {
 
   const values = [
     { value: recordLabel(team), className: "record" },
-    { value: team.gamesPlayed ? (team.wins / team.gamesPlayed).toFixed(3).replace(/^0/, "") : "-" },
+    { value: team.gamesPlayed ? winningPercentage(team).toFixed(3).replace(/^0/, "") : "-" },
     { value: streakLabel(team), className: team.history.length ? "streak" : "" },
   ];
   values.forEach(({ value, className }) => {
@@ -929,7 +933,7 @@ function standingsView() {
     const teams = [...standings.values()]
       .filter((team) => team.conference === state.conference && team.division === division)
       .sort((left, right) => {
-        const pctDifference = (right.gamesPlayed ? right.wins / right.gamesPlayed : 0) - (left.gamesPlayed ? left.wins / left.gamesPlayed : 0);
+        const pctDifference = winningPercentage(right) - winningPercentage(left);
         return pctDifference || right.wins - left.wins || left.nickname.localeCompare(right.nickname);
       });
     const card = document.createElement("section");
