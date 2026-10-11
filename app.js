@@ -4,13 +4,12 @@ const DATA = {
 };
 
 const APP_STORAGE_PREFIX = "nfl-spoiler-free:";
+const SELECTED_SEASON_STORAGE_KEY = `${APP_STORAGE_PREFIX}selected-season:v1`;
 const REVEAL_STORAGE_PREFIX = `${APP_STORAGE_PREFIX}revealed:v1:`;
-const REVEAL_STORAGE_KEY = `${REVEAL_STORAGE_PREFIX}${DATA.season}`;
 const DATA_BACKUP_FORMAT = "nfl-spoiler-free-data";
 const DATA_BACKUP_VERSION = 1;
 const DATA_CACHE_DATABASE = "nfl-spoiler-free-data";
 const DATA_CACHE_STORE = "season-snapshots";
-const DATA_CACHE_KEY = String(DATA.season);
 const DATA_REVALIDATE_INTERVAL = 60 * 60 * 1000;
 
 let dataCacheDatabase;
@@ -28,6 +27,7 @@ const state = {
 const loading = document.querySelector("#loading");
 const error = document.querySelector("#error");
 const content = document.querySelector("#content");
+const seasonSelect = document.querySelector("#season-select");
 const dataDialog = document.querySelector("#data-dialog");
 const dataStatus = document.querySelector("#data-status");
 const teamDialog = document.querySelector("#team-dialog");
@@ -39,6 +39,7 @@ const teamGamesList = document.querySelector("#team-games-list");
 let returnTeamAbbreviation = null;
 let returnTeamGameId = null;
 let teamDialogReturnScroll = 0;
+let publishedManifest = null;
 
 function parseCsv(text) {
   const records = [];
@@ -103,9 +104,9 @@ function normalizeTeams(rows, seasonTeams) {
     }));
 }
 
-function normalizeGames(rows) {
+function normalizeGames(rows, season = DATA.season) {
   return rows
-    .filter((row) => Number(row.season) === DATA.season && row.game_type === "REG")
+    .filter((row) => Number(row.season) === season && row.game_type === "REG")
     .map((row) => {
       const awayScore = numberOrNull(row.away_score);
       const homeScore = numberOrNull(row.home_score);
@@ -132,10 +133,14 @@ function completedGameIds() {
   return new Set(state.games.filter((game) => game.status === "final").map((game) => game.id));
 }
 
+function revealStorageKey(season = DATA.season) {
+  return `${REVEAL_STORAGE_PREFIX}${season}`;
+}
+
 function restoreRevealedGames() {
   const completedIds = completedGameIds();
   try {
-    const saved = localStorage.getItem(REVEAL_STORAGE_KEY);
+    const saved = localStorage.getItem(revealStorageKey());
     const gameIds = saved ? JSON.parse(saved) : [];
     state.revealed = new Set(
       [...state.revealed, ...(Array.isArray(gameIds) ? gameIds : [])]
@@ -148,7 +153,7 @@ function restoreRevealedGames() {
 
 function persistRevealedGames() {
   try {
-    localStorage.setItem(REVEAL_STORAGE_KEY, JSON.stringify([...state.revealed]));
+    localStorage.setItem(revealStorageKey(), JSON.stringify([...state.revealed]));
   } catch {
     // Revealing games remains available for this page load when storage is blocked.
   }
@@ -273,7 +278,7 @@ function resetSavedData() {
   try {
     for (let index = localStorage.length - 1; index >= 0; index -= 1) {
       const key = localStorage.key(index);
-      if (key?.startsWith(APP_STORAGE_PREFIX)) localStorage.removeItem(key);
+      if (key?.startsWith(REVEAL_STORAGE_PREFIX)) localStorage.removeItem(key);
     }
   } catch {
     cleared = false;
@@ -847,37 +852,159 @@ function render({ scrollToCurrentWeek = false } = {}) {
   }
 }
 
+function availableSeasons(manifest) {
+  return Object.entries(manifest?.seasons || {})
+    .filter(([season, resource]) => {
+      const regularSeasonGames = Number(resource?.gameTypeCounts?.REG);
+      if (!/^\d{4}$/.test(season) || !Number.isInteger(resource?.records)
+        || resource.records < 1 || !Number.isFinite(regularSeasonGames)
+        || regularSeasonGames < 1) return false;
+      try {
+        validatePublishedResource(resource);
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .map(([season]) => Number(season))
+    .sort((left, right) => right - left);
+}
+
+function readSelectedSeason() {
+  try {
+    const season = localStorage.getItem(SELECTED_SEASON_STORAGE_KEY);
+    return /^\d{4}$/.test(season || "") ? Number(season) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSelectedSeason(season) {
+  try {
+    localStorage.setItem(SELECTED_SEASON_STORAGE_KEY, String(season));
+  } catch {
+    // The newest available season remains the default when storage is blocked.
+  }
+}
+
 async function loadData() {
+  publishedManifest = await loadManifest();
+  const seasons = availableSeasons(publishedManifest);
+  if (seasons.length === 0) throw new Error("No regular-season data is available");
+
+  seasonSelect.replaceChildren(...seasons.map((season) => {
+    const option = document.createElement("option");
+    option.value = String(season);
+    option.textContent = String(season);
+    return option;
+  }));
+
+  const savedSeason = readSelectedSeason();
+  DATA.season = seasons.includes(savedSeason) ? savedSeason : seasons[0];
+  seasonSelect.value = String(DATA.season);
+  saveSelectedSeason(DATA.season);
+  await loadSeasonData(DATA.season, publishedManifest);
+  seasonSelect.disabled = false;
+}
+
+async function loadManifest() {
+  let cachedRecord = null;
+  try {
+    cachedRecord = await readCacheRecord("manifest");
+  } catch {
+    // IndexedDB is an optional cache; data can still load from the network.
+  }
+
+  const cachedManifest = cachedRecord?.manifest;
+  const cacheAge = Date.now() - cachedRecord?.checkedAt;
+  const cacheIsFresh = Number.isFinite(cacheAge)
+    && cacheAge >= 0 && cacheAge < DATA_REVALIDATE_INTERVAL;
+  if (cacheIsFresh && availableSeasons(cachedManifest).length) return cachedManifest;
+
+  try {
+    const response = await fetch(DATA.manifestUrl, { cache: "no-cache" });
+    if (!response.ok) {
+      throw new Error(`Data manifest request failed: ${response.status} ${response.statusText}`);
+    }
+    const manifest = await response.json();
+    if (availableSeasons(manifest).length === 0) {
+      throw new Error("The data manifest contains no available regular seasons");
+    }
+    try {
+      await writeCacheRecord({
+        season: "manifest",
+        manifest,
+        checkedAt: Date.now(),
+      });
+    } catch {
+      // A cache write failure does not prevent using the downloaded manifest.
+    }
+    return manifest;
+  } catch (manifestError) {
+    if (availableSeasons(cachedManifest).length) return cachedManifest;
+
+    // Older app versions stored the manifest alongside their 2025 snapshot.
+    const legacySeason = readSelectedSeason() || 2025;
+    let legacySnapshot = null;
+    try {
+      legacySnapshot = await readCachedSeason(legacySeason);
+    } catch {
+      // The network error below is more useful when no cache can be read.
+    }
+    if (availableSeasons(legacySnapshot?.manifest).length) {
+      try {
+        await writeCacheRecord({
+          season: "manifest",
+          manifest: legacySnapshot.manifest,
+          checkedAt: legacySnapshot.checkedAt,
+        });
+      } catch {
+        // The legacy manifest can still be used for this page load.
+      }
+      return legacySnapshot.manifest;
+    }
+    throw manifestError;
+  }
+}
+
+async function loadSeasonData(season, manifest) {
   let cachedSnapshot = null;
   try {
-    cachedSnapshot = await readCachedSeason();
+    cachedSnapshot = await readCachedSeason(season);
   } catch {
     // IndexedDB is an optional cache; data can still load from the network.
   }
 
   if (cachedSnapshot) {
     try {
-      applySeasonSnapshot(cachedSnapshot);
-      const cacheAge = Date.now() - cachedSnapshot.checkedAt;
-      if (!Number.isFinite(cacheAge) || cacheAge < 0 || cacheAge >= DATA_REVALIDATE_INTERVAL) {
-        refreshSeasonSnapshot(cachedSnapshot)
-          .then((snapshot) => {
-            if (snapshot.gamesCsv === cachedSnapshot.gamesCsv
-              && snapshot.teamsCsv === cachedSnapshot.teamsCsv) return;
-            applySeasonSnapshot(snapshot);
-            render();
-          })
-          .catch(() => {
-            // Keep the last usable snapshot when refresh fails or the browser is offline.
-          });
-      }
-      return;
+      applySeasonSnapshot(cachedSnapshot, season);
     } catch {
       cachedSnapshot = null;
     }
   }
 
-  applySeasonSnapshot(await refreshSeasonSnapshot(cachedSnapshot));
+  const gameResource = manifest.seasons[String(season)];
+  const teamsResource = manifest.teams;
+  const cachedDataIsCurrent = cachedSnapshot
+    && cachedResourceHash(cachedSnapshot, "games", season) === gameResource.sha256
+    && cachedResourceHash(cachedSnapshot, "teams", season) === teamsResource.sha256;
+  if (cachedDataIsCurrent) return;
+
+  if (cachedSnapshot) {
+    refreshSeasonSnapshot(season, manifest, cachedSnapshot)
+      .then((snapshot) => {
+        if (DATA.season !== season) return;
+        applySeasonSnapshot(snapshot, season);
+        render();
+      })
+      .catch(() => {
+        // Keep the last usable snapshot when refresh fails or the browser is offline.
+      });
+    return;
+  }
+
+  const snapshot = await refreshSeasonSnapshot(season, manifest, cachedSnapshot);
+  if (DATA.season === season) applySeasonSnapshot(snapshot, season);
 }
 
 function openDataCache() {
@@ -901,26 +1028,41 @@ function openDataCache() {
   return dataCacheDatabase;
 }
 
-async function readCachedSeason() {
+async function readCacheRecord(key) {
   const database = await openDataCache();
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(DATA_CACHE_STORE, "readonly");
-    const request = transaction.objectStore(DATA_CACHE_STORE).get(DATA_CACHE_KEY);
+    const request = transaction.objectStore(DATA_CACHE_STORE).get(String(key));
     request.onsuccess = () => resolve(request.result || null);
     request.onerror = () => reject(request.error);
     transaction.onabort = () => reject(transaction.error);
   });
 }
 
-async function writeCachedSeason(snapshot) {
+async function writeCacheRecord(record) {
   const database = await openDataCache();
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(DATA_CACHE_STORE, "readwrite");
-    transaction.objectStore(DATA_CACHE_STORE).put({ ...snapshot, season: DATA_CACHE_KEY });
+    transaction.objectStore(DATA_CACHE_STORE).put({ ...record, season: String(record.season) });
     transaction.oncomplete = resolve;
     transaction.onerror = () => reject(transaction.error);
     transaction.onabort = () => reject(transaction.error);
   });
+}
+
+function readCachedSeason(season) {
+  return readCacheRecord(season);
+}
+
+function writeCachedSeason(snapshot) {
+  return writeCacheRecord(snapshot);
+}
+
+function cachedResourceHash(snapshot, resourceType, season) {
+  if (resourceType === "games") {
+    return snapshot.gamesSha256 || snapshot.manifest?.seasons?.[String(season)]?.sha256;
+  }
+  return snapshot.teamsSha256 || snapshot.manifest?.teams?.sha256;
 }
 
 function publishedResourceUrl(path) {
@@ -953,34 +1095,29 @@ async function fetchCsvResource(resource) {
   return csv;
 }
 
-async function refreshSeasonSnapshot(cachedSnapshot) {
-  const response = await fetch(DATA.manifestUrl, { cache: "no-cache" });
-  if (!response.ok) {
-    throw new Error(`Data manifest request failed: ${response.status} ${response.statusText}`);
-  }
-  const manifest = await response.json();
-  const gameResource = manifest.seasons?.[String(DATA.season)];
+async function refreshSeasonSnapshot(season, manifest, cachedSnapshot) {
+  const gameResource = manifest.seasons?.[String(season)];
   const teamsResource = manifest.teams;
   validatePublishedResource(gameResource);
   validatePublishedResource(teamsResource);
 
-  const cachedManifest = cachedSnapshot?.manifest;
-  const cachedGamesResource = cachedManifest?.seasons?.[String(DATA.season)];
-  const gamesUnchanged = cachedGamesResource?.sha256 === gameResource.sha256
-    && typeof cachedSnapshot.gamesCsv === "string";
-  const teamsUnchanged = cachedManifest?.teams?.sha256 === teamsResource.sha256
-    && typeof cachedSnapshot.teamsCsv === "string";
+  const gamesUnchanged = cachedResourceHash(cachedSnapshot || {}, "games", season) === gameResource.sha256
+    && typeof cachedSnapshot?.gamesCsv === "string";
+  const teamsUnchanged = cachedResourceHash(cachedSnapshot || {}, "teams", season) === teamsResource.sha256
+    && typeof cachedSnapshot?.teamsCsv === "string";
   const [gamesCsv, teamsCsv] = await Promise.all([
     gamesUnchanged ? cachedSnapshot.gamesCsv : fetchCsvResource(gameResource),
     teamsUnchanged ? cachedSnapshot.teamsCsv : fetchCsvResource(teamsResource),
   ]);
   const snapshot = {
-    manifest,
+    season: String(season),
+    gamesSha256: gameResource.sha256,
+    teamsSha256: teamsResource.sha256,
     gamesCsv,
     teamsCsv,
     checkedAt: Date.now(),
   };
-  normalizeSeasonSnapshot(snapshot);
+  normalizeSeasonSnapshot(snapshot, season);
   try {
     await writeCachedSeason(snapshot);
   } catch {
@@ -989,19 +1126,22 @@ async function refreshSeasonSnapshot(cachedSnapshot) {
   return snapshot;
 }
 
-function applySeasonSnapshot(snapshot) {
-  const { games, teams } = normalizeSeasonSnapshot(snapshot);
+function applySeasonSnapshot(snapshot, season = Number(snapshot.season) || DATA.season) {
+  const { games, teams } = normalizeSeasonSnapshot(snapshot, season);
 
   state.games = games;
   state.teams = teams;
   restoreRevealedGames();
   const completedWeeks = state.games.filter((game) => game.status === "final").map((game) => game.week);
-  state.currentWeek = Math.max(...completedWeeks);
+  const scheduledWeeks = state.games.map((game) => game.week);
+  state.currentWeek = completedWeeks.length
+    ? Math.max(...completedWeeks)
+    : Math.min(...scheduledWeeks);
   state.expandedWeeks.add(state.currentWeek);
 }
 
-function normalizeSeasonSnapshot(snapshot) {
-  const games = normalizeGames(parseCsv(snapshot.gamesCsv));
+function normalizeSeasonSnapshot(snapshot, season = Number(snapshot.season) || DATA.season) {
+  const games = normalizeGames(parseCsv(snapshot.gamesCsv), season);
   const seasonTeams = new Set(games.flatMap((game) => [game.awayTeam, game.homeTeam]));
   const teams = normalizeTeams(parseCsv(snapshot.teamsCsv), seasonTeams);
   if (games.length === 0 || teams.size === 0) throw new Error("NFL data was empty");
@@ -1014,6 +1154,39 @@ document.querySelectorAll(".view-tab").forEach((tab) => {
     window.history.replaceState(null, "", state.view === "standings" ? "#standings" : "#schedule");
     render({ scrollToCurrentWeek: state.view === "schedule" });
   });
+});
+
+seasonSelect.addEventListener("change", () => {
+  const season = Number(seasonSelect.value);
+  if (!availableSeasons(publishedManifest).includes(season)) return;
+
+  DATA.season = season;
+  saveSelectedSeason(season);
+  state.revealed.clear();
+  state.games = [];
+  state.teams.clear();
+  state.currentWeek = null;
+  state.expandedWeeks.clear();
+  seasonSelect.disabled = true;
+  error.hidden = true;
+  content.hidden = true;
+  loading.textContent = `Loading ${season} data...`;
+  loading.hidden = false;
+
+  loadSeasonData(season, publishedManifest)
+    .then(() => {
+      if (DATA.season !== season) return;
+      seasonSelect.disabled = false;
+      loading.hidden = true;
+      render({ scrollToCurrentWeek: state.view === "schedule" });
+    })
+    .catch((loadError) => {
+      if (DATA.season !== season) return;
+      seasonSelect.disabled = false;
+      loading.hidden = true;
+      error.textContent = `Unable to load NFL data. ${loadError.message}`;
+      error.hidden = false;
+    });
 });
 
 window.addEventListener("hashchange", () => {

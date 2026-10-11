@@ -76,8 +76,11 @@ contains the broader implementation plan.
   https://zapster.github.io/nfl-spoilerfree-data/manifest.json. Its manifest
   points to immutable, hash-versioned CSV files; no app page regeneration is
   needed when the dataset changes.
-- For now, the app loads only the 2025 season and filters its source-schema game
-  CSV to regular-season (`REG`) games.
+- The season picker is built from manifest seasons with published regular-season
+  records, newest first. Default to the newest season on first use; persist the
+  user's selection in local storage and restore it while it remains available.
+- Load only the selected season and filter its source-schema game CSV to
+  regular-season (`REG`) games.
 - The data repository generates its snapshots from the nflverse schedules
   release:
   https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv
@@ -86,12 +89,12 @@ contains the broader implementation plan.
   https://github.com/nflverse/nflverse-data/releases/download/teams/teams_colors_logos.csv
 - The upstream data is licensed under CC BY 4.0 and attributed to nflverse-data
   contributors.
-- Cache the manifest and CSV snapshot in IndexedDB, separately from user reveal
-  selections in local storage.
-- Render cached data immediately. On a visit with a cache at least one hour old,
-  revalidate the manifest in the background, fetch CSVs only when their
-  manifest digest changes, and keep the last usable snapshot if refresh fails or
-  the browser is offline.
+- Cache the manifest and per-season CSV snapshots in IndexedDB, separately from
+  the selected-season preference and user reveal selections in local storage.
+- Reuse the cached manifest for up to one hour, then revalidate it on page load
+  with the cached manifest as an offline fallback. If a selected season's
+  digest changed, render its cached snapshot while refreshing the CSVs and keep
+  the last usable snapshot if refresh fails or the browser is offline.
 - Fall back to network loading if IndexedDB is unavailable.
 - Standings are derived from current results rather than persisted initially.
 - The published GitHub Pages data files were verified to allow cross-origin
@@ -120,10 +123,11 @@ contains the broader implementation plan.
 - The production entry point is `index.html`; the two `*-mockup.html` files
   remain static design references.
 - The implementation is dependency-free static HTML, CSS, and JavaScript.
-- `app.js` reads the published manifest and 2025 CSVs, caches their snapshot in
-  IndexedDB, and persists revealed game IDs in season-scoped local storage.
-  The manifest is revalidated hourly; CSVs are fetched again only when their
-  manifest digest changes.
+- `app.js` builds the season picker from the published manifest and loads the
+  selected season's CSVs. It caches the manifest and per-season snapshots in
+  IndexedDB, and persists the selected season and revealed game IDs in
+  local storage. The manifest is revalidated hourly; CSVs are fetched again only
+  when their manifest digest changes.
 - `favicon.svg` is an original shield-and-football mark; the app does not use the
   official NFL shield.
 - The `Manage data` dialog exports/imports revealed-game selections as JSON and
