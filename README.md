@@ -3,6 +3,10 @@
 A dependency-free browser app for browsing NFL regular-season games without
 revealing results by default.
 
+## Public Website
+
+The app is published at <https://zapster.github.io/nfl-spoilerfree/>.
+
 ## Legal and Contact
 
 NFL Spoiler-Free is an unofficial personal hobby project, offered free of charge
@@ -23,12 +27,11 @@ rights to those separate images or marks; their rights remain with their
 respective owners. The browser favicon is an original design and does not use
 the official NFL shield.
 
-Bug reports, feature requests, and missing features are tracked in
-[GitHub Issues](https://github.com/zapster/nfl-spoilerfree/issues). Issues will
-be public when the repository is public, so do not include sensitive information.
-For a private concern, including a rights-related matter, use the contact
-information on [zapster.cc](https://zapster.cc/). I welcome reports and will
-review concerns in good faith and work to resolve them.
+Bug reports, feature requests, and missing features are tracked in public
+[GitHub Issues](https://github.com/zapster/nfl-spoilerfree/issues), so do not
+include sensitive information. For a private concern, including a rights-related
+matter, use the contact information on [zapster.cc](https://zapster.cc/). I
+welcome reports and will review concerns in good faith and work to resolve them.
 
 ## Data Source and Cache
 
@@ -47,7 +50,9 @@ season's hash-versioned CSV path and SHA-256 digest from that entry. The
 published game snapshots retain the nflverse schema and include all game types;
 the app filters each snapshot to `REG` games. Team metadata may include
 historical teams, so the app displays only teams participating in the selected
-season's regular-season schedule. Postseason games are not currently shown.
+season's regular-season schedule. The digest is used as a cache version identifier;
+the browser does not independently recompute it to verify downloaded CSV bytes.
+Postseason games are not currently shown.
 
 The data repository publishes snapshots generated from the public nflverse
 releases for
@@ -59,20 +64,31 @@ dataset is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.
 attribution: **nflverse-data contributors**,
 <https://github.com/nflverse/nflverse-data>.
 
-On first use, the browser fetches the manifest and the selected season's game
+Before reading saved app preferences or loading NFL data on first use, the app
+shows a browser-storage notice. **Continue to app** saves an acknowledgment in
+`localStorage` when available and proceeds; **Leave page** exits without loading
+app data. If the acknowledgment cannot be saved, the notice may reappear on a
+future visit. The acknowledgment remains until this site's browser data is
+cleared; **Reset saved selections** does not clear it. The notice explains the
+storage and external requests. The app does not use analytics or advertising
+trackers; requests to GitHub Pages and logo hosts still expose normal connection
+information, such as the visitor's IP address, to those hosts.
+
+After continuing, the browser fetches the manifest and selected season's game
 and team CSVs, then stores the manifest and per-season snapshots in IndexedDB.
-The selected season is a small `localStorage` preference, separate from the
-data cache and reveal selections. A cached manifest is reused for up to one
-hour, then revalidated on page load (with the cached manifest as an offline
-fallback). CSVs are downloaded only when their published digest changes. A
-cached season snapshot is shown while changed files refresh, and remains
-available if a refresh fails or the browser is offline. If IndexedDB is
-unavailable, the app still attempts a normal network load. The downloaded
-source cache is not included in JSON backups. **Clear cache** removes the
-manifest and all per-season snapshots from IndexedDB; **Reset saved selections**
-removes reveal selections and the saved season preference from local storage.
-Using the app after clearing its cache will download and cache data again as
-needed.
+The selected season and revealed-game choices are stored in app-specific
+`localStorage` keys, separate from the IndexedDB cache. Saved preferences remain
+until reset or site data is cleared. A cached manifest is reused for up to one
+hour, then revalidated on page load; if revalidation fails, the cached manifest
+is used as an offline fallback. CSVs are downloaded when their published digest
+changes. A cached season snapshot is shown while changed files refresh, and
+remains available if a refresh fails or the browser is offline. If IndexedDB is
+unavailable, the app still attempts a normal network load. The downloaded source
+cache is not included in JSON backups. **Clear cache** removes the manifest and
+all per-season snapshots from IndexedDB; **Reset saved selections** removes
+reveal selections and the saved season preference from local storage but leaves
+the notice acknowledgment intact. Using the app after clearing its cache will
+download and cache data again as needed.
 
 ## Local Website
 

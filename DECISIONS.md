@@ -58,7 +58,8 @@ This file records product and implementation decisions for the current app.
   games are excluded.
 - Mark the current week in the team's game list when that week is present.
 - Open the list scrolled to the current week, or the nearest prior team week
-  during a bye.
+  during a bye. Outside the season date range, use the opening or final focus
+  week without marking it current.
 - Per-game score controls use the same persisted reveal state as the main views.
 - Closing the dialog returns to the originating view, scroll position, and team
   control.
@@ -82,6 +83,14 @@ This file records product and implementation decisions for the current app.
 
 ## Data Loading and Caching
 
+- Show a first-use notice describing `localStorage` preferences, the IndexedDB
+  data cache, external resource requests, and the absence of analytics or
+  advertising trackers. Wait for Continue before reading saved preferences or
+  loading app data; Leave exits. Remember acceptance in `localStorage` when
+  available; if storage is unavailable, allow the current visit and show the
+  notice again next time. Per the owner's product decision, there is no in-app
+  cache opt-out. Resetting saved selections does not remove the notice
+  acknowledgment.
 - Keep the deployed app static. Read immutable, hash-versioned season and team
   CSV snapshots from the published data repository; source URLs and attribution
   are in `README.md`.
@@ -92,7 +101,9 @@ This file records product and implementation decisions for the current app.
 - Cache the manifest and season CSVs in IndexedDB; keep the season preference
   and revealed game IDs in separate `localStorage` keys.
 - Revalidate the manifest hourly and refresh CSVs when their digest changes.
-  Keep cached snapshots usable offline or after a failed refresh.
+  Use the digest as a cache version identifier, not as client-side verification
+  of downloaded bytes. Keep cached snapshots usable offline or after a failed
+  refresh.
 - Use `cache: "no-store"` for source requests, allow users to clear the cache,
   and fall back to network loading if IndexedDB is unavailable.
 
