@@ -464,10 +464,11 @@ function logoElement(team, size = "large") {
 
   if (team.logoUrl) {
     const image = document.createElement("img");
-    image.src = team.logoUrl;
     image.alt = "";
     image.setAttribute("aria-hidden", "true");
+    image.addEventListener("load", () => fallback.remove(), { once: true });
     image.addEventListener("error", () => image.remove());
+    image.src = team.logoUrl;
     logo.append(image);
   }
   return logo;

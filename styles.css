@@ -268,9 +268,10 @@ h2 { margin-bottom: 0; font-size: 19px; letter-spacing: -.025em; }
   width: 56px;
   height: 56px;
   flex: 0 0 auto;
+  overflow: hidden;
   place-items: center;
   color: white;
-  background: var(--badge-color);
+  background: var(--card);
   border-radius: 9px 9px 9px 3px;
   font-size: 10px;
   font-weight: 900;
@@ -278,9 +279,9 @@ h2 { margin-bottom: 0; font-size: 19px; letter-spacing: -.025em; }
 }
 
 .team-logo-small { width: 32px; height: 32px; border-radius: 7px 7px 7px 2px; font-size: 8px; }
-.team-logo img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 4px; object-fit: contain; background: var(--card); border-radius: inherit; }
+.team-logo img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 4px; object-fit: contain; background: var(--card); }
 .team-logo-small img { padding: 3px; }
-.team-logo-fallback { display: grid; width: 100%; height: 100%; place-items: center; }
+.team-logo-fallback { display: grid; width: 100%; height: 100%; place-items: center; background: var(--badge-color); }
 
 .game-score {
   display: grid;
