@@ -64,6 +64,14 @@ dataset is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.
 attribution: **nflverse-data contributors**,
 <https://github.com/nflverse/nflverse-data>.
 
+The nflverse schedule data dictionary specifies that `gametime` is a 24-hour
+kickoff time in Eastern Time, regardless of game location. The app interprets
+`gameday` and `gametime` together in `America/New_York`, then displays known
+kickoffs, weekdays, and week date ranges in the browser's default time zone and
+locale. Games without a published kickoff time remain `Time TBD`; their source
+date is retained for date labels. Current-week detection continues to use
+`America/New_York`.
+
 Before reading saved app preferences or loading NFL data on first use, the app
 shows a browser-storage notice. **Continue to app** saves an acknowledgment in
 `localStorage` when available and proceeds; **Leave page** exits without loading

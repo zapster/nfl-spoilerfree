@@ -1,3 +1,5 @@
+import { formatWeekDate, gamePresentation } from "./schedule-time.mjs";
+
 const DATA = {
   season: 2025,
   manifestUrl: "https://zapster.github.io/nfl-spoilerfree-data/manifest.json",
@@ -409,24 +411,6 @@ teamDialog.addEventListener("close", () => {
   });
 });
 
-function formatDate(date) {
-  return new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatWeekDate(games) {
-  const dates = [...new Set(games.map((game) => game.date))].sort();
-  if (dates.length === 0) return "";
-  if (dates.length === 1) return formatDate(dates[0]);
-  const first = new Date(`${dates[0]}T12:00:00`);
-  const last = new Date(`${dates.at(-1)}T12:00:00`);
-  const firstLabel = first.toLocaleDateString("en-US", { month: "long", day: "numeric" });
-  const lastLabel = last.toLocaleDateString("en-US", { month: "long", day: "numeric" });
-  return `${firstLabel} - ${lastLabel}`;
-}
-
 function scheduleWeekTargets(games) {
   const rangesByWeek = new Map();
   games.forEach((game) => {
@@ -457,14 +441,6 @@ function scheduleWeekTargets(games) {
     currentWeek,
     focusWeek: currentWeek ?? (today < firstWeek.start ? firstWeek.week : finalWeek.week),
   };
-}
-
-function formatTime(time) {
-  if (!time) return "Time TBD";
-  const [hours, minutes] = time.split(":").map(Number);
-  const suffix = hours >= 12 ? "PM" : "AM";
-  const displayHours = hours % 12 || 12;
-  return `${displayHours}:${String(minutes).padStart(2, "0")} ${suffix}`;
 }
 
 function teamFor(abbreviation) {
@@ -519,6 +495,7 @@ function teamElement(team, home = false) {
 function gameElement(game, onScoreChange = () => render()) {
   const away = teamFor(game.awayTeam);
   const home = teamFor(game.homeTeam);
+  const presentation = gamePresentation(game);
   const article = document.createElement("article");
   article.className = "game-card";
 
@@ -529,9 +506,9 @@ function gameElement(game, onScoreChange = () => render()) {
   status.textContent = game.status === "final" ? "Final" : "Scheduled";
   time.append(
     status,
-    document.createTextNode(game.weekday.slice(0, 3)),
+    document.createTextNode(presentation.weekday),
     document.createElement("br"),
-    document.createTextNode(formatTime(game.time)),
+    document.createTextNode(presentation.time),
   );
 
   const matchup = document.createElement("div");

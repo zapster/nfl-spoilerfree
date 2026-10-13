@@ -16,6 +16,13 @@ This file records product and implementation decisions for the current app.
   current before the season's first game date or after its final game date.
 - Outside the season's date range, expand and scroll to the opening week before
   the season, or the final week after it, without a current-week label.
+- Interpret published `gameday` and `gametime` values together in
+  `America/New_York`, as specified by the nflverse schedule data dictionary.
+  Present known kickoffs and their weekday/date labels in the browser's default
+  time zone and locale; week date ranges use those local kickoff dates. Keep
+  games without a known kickoff time as `Time TBD` and retain their published
+  date for date labels. This presentation conversion does not change the
+  New York-based current-week calculation above.
 - Entering the Schedule view scrolls to the current week.
 - Week expansion state is kept in memory across renders, but not persisted.
 - A `Manage data` action beside the season picker opens data import, export, and
