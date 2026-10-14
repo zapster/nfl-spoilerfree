@@ -157,12 +157,15 @@ button.team:hover > span:not(.team-logo) { text-decoration: underline; text-deco
 .team-dialog-header .eyebrow { margin-bottom: 4px; color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
 .team-dialog-description { margin: 0; color: var(--muted); font-size: 12px; }
 .team-dialog-content { flex: 1; min-height: 0; overflow: auto; padding: 8px clamp(18px, 3vw, 44px) 32px; overscroll-behavior: contain; }
-.team-week { padding: 18px 0 22px; border-bottom: 1px solid var(--line); }
-.team-week-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
-.team-week-heading h3 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
-.team-week-date { color: var(--muted); font-size: 12px; }
-.team-week-games { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-.team-week-games .game-card { width: 100%; max-width: 960px; margin-inline: auto; }
+.team-games-panel { overflow: hidden; background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+.team-games-panel .game-card { width: 100%; min-height: 0; margin: 0; padding: 8px 16px; background: transparent; border: 0; border-bottom: 1px solid #efede7; border-radius: 0; box-shadow: none; }
+.team-games-panel .game-card:last-child { border-bottom: 0; }
+.team-games-panel .game-time { min-width: 0; }
+.game-week-date { display: block; color: var(--muted); font-size: 11px; font-weight: 750; line-height: 1.35; letter-spacing: 0; text-transform: none; }
+.game-week-date .current-week { margin-left: 4px; padding: 2px 5px; font-size: 8px; }
+.team-games-panel .matchup { grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); }
+.team-games-panel .team { min-height: 44px; }
+.team-games-panel .game-score { min-width: 96px; word-spacing: -4px; }
 .team-games-empty { padding: 32px 0; color: var(--muted); }
 
 .loading-state, .error-state {
@@ -335,6 +338,7 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
 
 .week-block[open] .game-card:last-child { border-bottom: 0; }
 .week-block[open] .matchup { grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); }
+.week-block[open] .team, .team-games-panel .team { min-height: 44px; }
 .week-block[open] .game-score { min-width: 96px; word-spacing: -4px; }
 
 .conference-tabs { display: inline-flex; padding: 4px; background: #ebe8e0; border-radius: 10px; }
@@ -385,6 +389,8 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .team-dialog-heading { gap: 11px; }
   .team-dialog-logo .team-logo { width: 48px; height: 48px; }
   .team-dialog-content { padding: 4px 18px 22px; }
+  .team-games-panel .game-card { padding: 6px 8px; }
+  .team-games-panel .game-score { font-size: 26px; }
   .standings-heading .conference-tabs { display: flex; margin-top: 20px; }
   .conference-tab { flex: 1; }
   .division-grid { grid-template-columns: 1fr; gap: 14px; }
@@ -413,11 +419,10 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .team-dialog-description { max-width: 35ch; font-size: 11px; }
   .team-dialog-header .dialog-close { padding: 7px 9px; font-size: 12px; }
   .team-dialog-content { padding: 2px 14px 16px; }
-  .team-week { padding: 15px 0 18px; }
 }
 
 @media (max-width: 360px) {
-  .week-block[open] .matchup { grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr); gap: 4px; }
-  .week-block[open] .game-score { min-width: 76px; font-size: 20px; }
-  .week-block[open] .team-logo { width: 34px; height: 34px; }
+  .week-block[open] .matchup, .team-games-panel .matchup { grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr); gap: 4px; }
+  .week-block[open] .game-score, .team-games-panel .game-score { min-width: 76px; font-size: 20px; }
+  .week-block[open] .team-logo, .team-games-panel .team-logo { width: 34px; height: 34px; }
 }

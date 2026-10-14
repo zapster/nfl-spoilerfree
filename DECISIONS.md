@@ -61,8 +61,8 @@ This file records product and implementation decisions for the current app.
 
 - Clicking a team's identity in Schedule or Standings opens a shared nearly
   full-screen dialog on desktop and mobile.
-- The dialog lists that team's regular-season games grouped by week; postseason
-  games are excluded.
+- The dialog lists that team's regular-season games chronologically in one panel,
+  with the week and date shown on each game row; postseason games are excluded.
 - Mark the current week in the team's game list when that week is present.
 - Open the list scrolled to the current week, or the nearest prior team week
   during a bye. Outside the season date range, use the opening or final focus

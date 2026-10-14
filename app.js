@@ -493,7 +493,7 @@ function teamElement(team, home = false) {
   return element;
 }
 
-function gameElement(game, onScoreChange = () => render()) {
+function gameElement(game, onScoreChange = () => render(), { showWeekDate = false } = {}) {
   const away = teamFor(game.awayTeam);
   const home = teamFor(game.homeTeam);
   const presentation = gamePresentation(game);
@@ -505,12 +505,26 @@ function gameElement(game, onScoreChange = () => render()) {
   const status = document.createElement("strong");
   status.className = game.status === "final" ? "is-final" : "is-scheduled";
   status.textContent = game.status === "final" ? "Final" : "Scheduled";
-  time.append(
-    status,
-    document.createTextNode(presentation.weekday),
-    document.createElement("br"),
-    document.createTextNode(presentation.time),
-  );
+  time.append(status);
+  if (showWeekDate) {
+    const weekDate = document.createElement("span");
+    weekDate.className = "game-week-date";
+    const date = formatWeekDate([game]);
+    weekDate.append(document.createTextNode(`Week ${game.week}${date ? ` · ${date}` : ""}`));
+    if (game.week === state.currentWeek) {
+      const currentMarker = document.createElement("span");
+      currentMarker.className = "current-week";
+      currentMarker.textContent = "Current";
+      weekDate.append(currentMarker);
+    }
+    time.append(weekDate);
+  } else {
+    time.append(
+      document.createTextNode(presentation.weekday),
+      document.createElement("br"),
+      document.createTextNode(presentation.time),
+    );
+  }
 
   const matchup = document.createElement("div");
   matchup.className = "matchup";
@@ -578,13 +592,13 @@ function openTeamGames(abbreviation, trigger) {
 }
 
 function scrollTeamGamesToCurrent() {
-  const weeks = [...teamGamesList.querySelectorAll(".team-week")];
+  const games = [...teamGamesList.querySelectorAll(".team-games-panel .game-card")];
   const targetWeek = state.currentWeek ?? state.focusWeek;
   const target = targetWeek === null
-    ? weeks[0]
-    : weeks.find((week) => Number(week.dataset.week) === targetWeek)
-      || weeks.filter((week) => Number(week.dataset.week) <= targetWeek).at(-1)
-      || weeks[0];
+    ? games[0]
+    : games.find((game) => Number(game.dataset.week) === targetWeek)
+      || games.filter((game) => Number(game.dataset.week) <= targetWeek).at(-1)
+      || games[0];
   if (!target) return;
 
   teamGamesList.scrollTop += target.getBoundingClientRect().top - teamGamesList.getBoundingClientRect().top;
@@ -609,34 +623,22 @@ function renderTeamGames(abbreviation, focusGameId = null) {
   }
 
   const weeks = [...new Set(games.map((game) => game.week))].sort((left, right) => left - right);
+  const panel = document.createElement("div");
+  panel.className = "team-games-panel";
   weeks.forEach((weekNumber) => {
-    const weekGames = games.filter((game) => game.week === weekNumber);
-    const week = document.createElement("section");
-    week.className = "team-week";
-    week.dataset.week = String(weekNumber);
-    const heading = document.createElement("div");
-    heading.className = "team-week-heading";
-    const title = document.createElement("h3");
-    title.textContent = `Week ${weekNumber}`;
-    if (weekNumber === state.currentWeek) {
-      const currentMarker = document.createElement("span");
-      currentMarker.className = "current-week";
-      currentMarker.textContent = "Current";
-      title.append(currentMarker);
-    }
-    const date = document.createElement("span");
-    date.className = "team-week-date";
-    date.textContent = formatWeekDate(weekGames);
-    heading.append(title, date);
-    const list = document.createElement("div");
-    list.className = "team-week-games";
-    weekGames.forEach((game) => list.append(gameElement(
-      game,
-      (gameId) => renderTeamGames(abbreviation, gameId),
-    )));
-    week.append(heading, list);
-    teamGamesList.append(week);
+    games
+      .filter((game) => game.week === weekNumber)
+      .forEach((game) => {
+        const row = gameElement(
+          game,
+          (gameId) => renderTeamGames(abbreviation, gameId),
+          { showWeekDate: true },
+        );
+        row.dataset.week = String(weekNumber);
+        panel.append(row);
+      });
   });
+  teamGamesList.append(panel);
 
   teamGamesList.scrollTop = scrollTop;
   if (focusGameId) {
