@@ -1,0 +1,199 @@
+.mockup-page {
+  --mockup-blue: #294b68;
+}
+
+.mockup-shell {
+  width: min(980px, calc(100% - 36px));
+  min-height: 100vh;
+  padding: 24px 0 42px;
+}
+
+.mockup-back {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+
+.mockup-header { max-width: 680px; margin-bottom: 25px; }
+.mockup-header .eyebrow { margin-bottom: 5px; }
+.mockup-header h1 { margin-bottom: 8px; font-size: clamp(28px, 5vw, 39px); }
+.mockup-header .intro { max-width: 60ch; font-size: 14px; line-height: 1.55; }
+.mockup-disclaimer { margin: 11px 0 0; color: var(--muted); font-size: 11px; }
+
+.mockup-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 6px;
+  background: #eae7df;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.mockup-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 12px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.mockup-tab:hover { color: var(--ink); }
+.mockup-tab.is-active { color: var(--ink); background: var(--card); border-color: var(--line); box-shadow: 0 2px 8px rgba(26, 37, 52, .07); }
+.mockup-tab-letter { display: grid; width: 24px; height: 24px; flex: 0 0 auto; place-items: center; color: var(--mockup-blue); background: #e7edf1; border-radius: 7px; font-size: 11px; font-weight: 900; }
+.mockup-tab-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mockup-tab-note { padding: 3px 6px; color: var(--green); background: #e5f0ea; border-radius: 999px; font-size: 9px; letter-spacing: .04em; text-transform: uppercase; }
+
+.mockup-overview { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 23px 0 14px; }
+.mockup-overview h2 { margin-bottom: 4px; font-size: 18px; }
+.mockup-overview p { margin-bottom: 0; }
+.mockup-overview #variant-description { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.mockup-screen-note { flex: 0 0 auto; color: var(--muted); font-size: 11px; font-weight: 750; }
+
+.mockup-stage { min-height: 450px; padding: 22px; background: rgba(255, 254, 250, .62); border: 1px solid var(--line); border-radius: 18px; }
+.mockup-stage:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.mockup-page-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.mockup-page-heading .eyebrow { margin-bottom: 4px; }
+.mockup-page-heading h2 { margin-bottom: 3px; font-size: 32px; }
+.mockup-page-heading .intro { font-size: 12px; }
+.mockup-week-count { padding: 6px 9px; color: var(--muted); background: var(--card); border: 1px solid var(--line); border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
+.mockup-footer { display: flex; justify-content: space-between; gap: 18px; padding: 15px 2px 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.mockup-footer a { flex: 0 0 auto; color: inherit; }
+
+.mockup-page .week-stream { gap: 0; }
+.mockup-page .week-block { overflow: hidden; }
+.mockup-page .week-summary { gap: 12px; padding: 10px 13px; }
+.mockup-page .week-summary-copy { align-items: center; gap: 10px; }
+.mockup-page .week-title { font-size: 23px; }
+.mockup-page .week-date { font-size: 13px; }
+.mockup-page .week-summary-actions { gap: 8px; }
+.mockup-page .week-count { font-size: 11px; white-space: nowrap; }
+.mockup-page .uncover-all { min-height: 34px; padding: 5px 9px; font-size: 10px; }
+.mockup-page .week-toggle { width: 22px; height: 22px; }
+.mockup-page .week-toggle::before, .mockup-page .week-toggle::after { top: 10px; left: 5px; }
+.mockup-example-pill { display: inline-block; margin-left: 5px; padding: 3px 6px; color: var(--mockup-blue); background: #e7edf1; border-radius: 999px; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; vertical-align: middle; }
+.mockup-page .week-block:not([open]) .week-summary { padding: 10px 13px; }
+.mockup-page .week-block:not([open]) + .week-block:not([open]) { margin-top: 0; }
+.mockup-page .game-card { grid-template-columns: 102px minmax(0, 1fr); gap: 14px; min-height: 0; padding: 10px 14px; border-radius: 11px; }
+.mockup-page .game-time { font-size: 12px; line-height: 1.4; }
+.mockup-page .game-time strong { font-size: 11px; }
+.mockup-page .matchup { grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); gap: 8px; }
+.mockup-page .team { width: 100%; min-height: 44px; gap: 7px; font-size: 26px; }
+.mockup-page .team.home { justify-content: flex-end; }
+.mockup-page .team-mark { display: grid; width: 48px; height: 48px; flex: 0 0 auto; place-items: center; color: white; background: var(--team-color); border-radius: 8px 8px 8px 3px; font-size: 12px; font-weight: 900; letter-spacing: -.04em; }
+.mockup-page .team-long { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mockup-page .team-short { display: none; }
+.mockup-page .game-score { min-width: 96px; min-height: 44px; padding: 2px; font-size: 29px; word-spacing: -4px; }
+
+/* A: preserve separate cards, trimming the existing card rhythm. */
+.mockup-page .variant-cards { display: grid; gap: 6px; margin-top: 8px; }
+.mockup-page .variant-cards .game-card { min-height: 66px; padding: 8px 12px; }
+.mockup-page .variant-cards .team-mark { width: 48px; height: 48px; }
+
+/* B: one week surface, with each matchup reduced to a divider-separated row. */
+.mockup-page .mockup-week-panel { margin-top: 8px; overflow: hidden; background: var(--card); border: 1px solid var(--line); border-radius: 13px; box-shadow: var(--shadow); }
+.mockup-page .mockup-week-panel .week-summary { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+.mockup-page .mockup-week-panel .game-card { padding: 7px 13px; background: transparent; border: 0; border-bottom: 1px solid #efede7; border-radius: 0; box-shadow: none; }
+.mockup-page .mockup-week-panel .game-card:last-child { border-bottom: 0; }
+.mockup-page .mockup-week-panel .game-time { padding-left: 1px; }
+.mockup-page .mockup-week-panel .team-mark { width: 48px; height: 48px; }
+
+/* C: group by day and show kickoff time/status beside each matchup. */
+.mockup-page .mockup-day-list { margin-top: 8px; overflow: hidden; background: var(--card); border: 1px solid var(--line); border-radius: 13px; box-shadow: var(--shadow); }
+.mockup-page .mockup-day-list .week-summary { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+.mockup-page .fixture-day + .fixture-day { border-top: 1px solid var(--line); }
+.mockup-page .fixture-day .game-card + .game-card { border-top: 1px solid #f0eee8; }
+.mockup-page .fixture-day-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0; padding: 8px 13px 5px; color: var(--mockup-blue); font-size: 10px; font-weight: 850; letter-spacing: .07em; text-transform: uppercase; }
+.mockup-page .fixture-day-heading span:last-child { color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .04em; }
+.mockup-page .mockup-day-list .game-card { grid-template-columns: 88px minmax(0, 1fr); gap: 10px; min-height: 54px; padding: 5px 13px; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+.mockup-page .mockup-day-list .team-mark { width: 48px; height: 48px; }
+.mockup-page .mockup-day-list .game-time { font-size: 11px; }
+.mockup-page .mockup-day-list .game-time strong { font-size: 10px; }
+.mockup-page .mockup-day-list .game-time .game-kickoff { display: block; color: var(--ink); font-size: 11px; font-weight: 750; text-transform: none; }
+.mockup-page .mockup-day-list .game-score { min-height: 44px; font-size: 29px; }
+
+@media (max-width: 700px) {
+  .mockup-shell { width: min(100% - 24px, 560px); padding-top: 18px; }
+  .mockup-back { margin-bottom: 18px; }
+  .mockup-header { margin-bottom: 18px; }
+  .mockup-header .intro { font-size: 13px; }
+  .mockup-picker { gap: 4px; padding: 4px; border-radius: 12px; }
+  .mockup-tab { flex-direction: column; gap: 4px; min-height: 64px; padding: 6px 3px; font-size: 10px; }
+  .mockup-tab-letter { width: 20px; height: 20px; font-size: 10px; }
+  .mockup-tab-note { display: none; }
+  .mockup-overview { align-items: flex-start; flex-direction: column; gap: 5px; margin: 17px 0 11px; }
+  .mockup-overview h2 { font-size: 16px; }
+  .mockup-overview #variant-description { font-size: 11px; }
+  .mockup-screen-note { font-size: 10px; }
+  .mockup-stage { min-height: 400px; padding: 12px 9px; border-radius: 14px; }
+  .mockup-page-heading { margin: 0 4px 14px; }
+  .mockup-page-heading h2 { font-size: 28px; }
+  .mockup-week-count { padding: 5px 7px; font-size: 10px; }
+  .mockup-page .week-summary { align-items: flex-start; gap: 6px; padding: 9px 8px; }
+  .mockup-page .week-summary-copy { display: block; min-width: 0; }
+  .mockup-page .week-title { display: block; font-size: 21px; }
+  .mockup-page .week-date { display: block; margin-top: 2px; font-size: 12px; }
+  .mockup-page .week-summary-actions { gap: 5px; }
+  .mockup-page .uncover-all { min-height: 32px; padding: 4px 6px; font-size: 9px; }
+  .mockup-page .week-count { font-size: 10px; }
+  .mockup-page .week-toggle { width: 20px; height: 20px; }
+  .mockup-page .week-toggle::before, .mockup-page .week-toggle::after { top: 9px; left: 4px; }
+  .mockup-page .week-block:not([open]) .week-summary { padding: 9px 8px; }
+  .mockup-page .game-card { grid-template-columns: 63px minmax(0, 1fr); gap: 6px; padding: 7px 7px; }
+  .mockup-page .game-time { font-size: 11px; }
+  .mockup-page .game-time strong { font-size: 10px; }
+  .mockup-page .matchup { grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); gap: 4px; }
+  .mockup-page .team { gap: 4px; font-size: 18px; }
+  .mockup-page .team-mark { width: 34px; height: 34px; border-radius: 7px 7px 7px 2px; font-size: 10px; }
+  .mockup-page .team > .team-mark { display: grid; }
+  .mockup-page .team > .team-long { display: none; }
+  .mockup-page .team > .team-short { display: inline; }
+  .mockup-page .game-score { min-width: 96px; min-height: 44px; font-size: 26px; }
+  .mockup-page .variant-cards { gap: 5px; margin-top: 6px; }
+  .mockup-page .variant-cards .game-card { min-height: 56px; padding: 5px 6px; }
+  .mockup-page .variant-cards .team-mark { width: 32px; height: 32px; }
+  .mockup-page .mockup-week-panel, .mockup-page .mockup-day-list { margin-top: 6px; }
+  .mockup-page .mockup-week-panel .game-card { padding: 5px 5px; }
+  .mockup-page .mockup-week-panel .team-mark { width: 32px; height: 32px; }
+  .mockup-page .fixture-day-heading { padding: 7px 8px 4px; font-size: 9px; }
+  .mockup-page .fixture-day-heading span:last-child { font-size: 8px; }
+  .mockup-page .mockup-day-list .game-card { grid-template-columns: 60px minmax(0, 1fr); gap: 4px; min-height: 56px; padding: 3px 7px; }
+  .mockup-page .mockup-day-list .team-mark { width: 34px; height: 34px; }
+  .mockup-page .mockup-day-list .game-time .game-kickoff { font-size: 11px; }
+  .mockup-page .mockup-day-list .matchup { grid-template-columns: minmax(0, 1fr) 84px minmax(0, 1fr); gap: 3px; }
+  .mockup-page .mockup-day-list .team { gap: 3px; }
+  .mockup-page .mockup-day-list .game-score { font-size: 26px; }
+  .mockup-footer { font-size: 10px; }
+}
+
+@media (max-width: 380px) {
+  .mockup-shell { width: min(100% - 18px, 560px); }
+  .mockup-stage { padding-inline: 6px; }
+  .mockup-page .week-summary-actions { gap: 3px; }
+  .mockup-page .uncover-all { padding-inline: 4px; font-size: 8px; }
+  .mockup-page .game-card { grid-template-columns: 56px minmax(0, 1fr); gap: 4px; padding-inline: 4px; }
+  .mockup-page .matchup { grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr); gap: 2px; }
+  .mockup-page .team { gap: 3px; font-size: 16px; }
+  .mockup-page .team-mark { width: 28px; height: 28px; }
+  .mockup-page .variant-cards .team-mark, .mockup-page .mockup-week-panel .team-mark { width: 28px; height: 28px; }
+  .mockup-page .matchup { grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr); }
+  .mockup-page .game-score { min-width: 80px; font-size: 22px; }
+  .mockup-page .mockup-day-list .game-card { grid-template-columns: 55px minmax(0, 1fr); padding-inline: 5px; }
+  .mockup-page .mockup-day-list .team-mark { width: 28px; height: 28px; }
+  .mockup-page .mockup-day-list .matchup { grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr); }
+  .mockup-page .mockup-day-list .game-score { font-size: 22px; }
+  .mockup-page .mockup-day-list .game-time .game-kickoff { font-size: 10px; }
+}

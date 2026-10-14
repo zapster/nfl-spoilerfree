@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Compare compact, spoiler-free NFL schedule layout concepts.">
+  <meta name="theme-color" content="#18212f">
+  <title>Schedule Layout Study | NFL Spoiler-Free</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./schedule-mockups.css">
+</head>
+<body class="mockup-page">
+  <main class="app-shell mockup-shell">
+    <a class="mockup-back" href="./">&larr; Back to NFL Spoiler-Free</a>
+    <header class="mockup-header">
+      <p class="eyebrow">Design exploration</p>
+      <h1>Schedule, with less scrolling</h1>
+      <p class="intro">Compare three ways to fit more of a week on screen without losing the details that make each game easy to scan.</p>
+      <p class="mockup-disclaimer">Illustrative matchups and demo scores only. Text and score sizes stay close to the live schedule; only spacing and grouping vary. Reveals do not affect saved choices.</p>
+    </header>
+
+    <div class="mockup-picker" role="tablist" aria-label="Schedule layout concepts">
+      <button class="mockup-tab" id="tab-cards" type="button" role="tab" aria-selected="false" aria-controls="mockup-panel" tabindex="-1" data-variant="cards">
+        <span class="mockup-tab-letter">A</span>
+        <span class="mockup-tab-label">Tighter cards</span>
+      </button>
+      <button class="mockup-tab" id="tab-week-panel" type="button" role="tab" aria-selected="false" aria-controls="mockup-panel" tabindex="-1" data-variant="week-panel">
+        <span class="mockup-tab-letter">B</span>
+        <span class="mockup-tab-label">One week panel</span>
+        <span class="mockup-tab-note">Balanced</span>
+      </button>
+      <button class="mockup-tab is-active" id="tab-day-list" type="button" role="tab" aria-selected="true" aria-controls="mockup-panel" tabindex="0" data-variant="day-list">
+        <span class="mockup-tab-letter">C</span>
+        <span class="mockup-tab-label">Day-grouped list</span>
+      </button>
+    </div>
+
+    <section class="mockup-overview" aria-live="polite">
+      <div>
+        <h2 id="variant-title">C. Day-grouped list</h2>
+        <p id="variant-description">Group by kickoff day so the date appears once, then scan game times and matchups in a denser list.</p>
+      </div>
+      <p class="mockup-screen-note">Same 8-game sample in every concept</p>
+    </section>
+
+    <div class="mockup-stage" id="mockup-panel" role="tabpanel" aria-labelledby="tab-day-list" tabindex="0">
+      <div class="mockup-page-heading">
+        <div>
+          <p class="eyebrow">2025 regular season</p>
+          <h2>Schedule</h2>
+          <p class="intro">Results hidden by default</p>
+        </div>
+        <span class="mockup-week-count">8 games</span>
+      </div>
+      <div class="week-stream" id="week-stream"></div>
+    </div>
+
+    <footer class="mockup-footer">
+      <span>Try a concept at your phone's normal text size, then widen the browser to compare desktop.</span>
+      <a href="https://github.com/zapster/nfl-spoilerfree/issues/7">Issue #7</a>
+    </footer>
+  </main>
+  <script type="module" src="./schedule-mockups.js"></script>
+</body>
+</html>
