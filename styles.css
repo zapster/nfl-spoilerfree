@@ -305,6 +305,38 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
 .game-score.is-scheduled { color: var(--muted); }
 .view-note, .legend { margin: 18px 0 0; color: var(--muted); font-size: 12px; }
 
+.week-block[open] {
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.week-block[open] .week-summary {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.week-block[open] > .games { gap: 0; margin: 0; }
+
+.week-block[open] .game-card {
+  min-height: 0;
+  padding: 8px 16px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #efede7;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.week-block[open] .game-card:last-child { border-bottom: 0; }
+.week-block[open] .matchup { grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); }
+.week-block[open] .game-score { min-width: 96px; word-spacing: -4px; }
+
 .conference-tabs { display: inline-flex; padding: 4px; background: #ebe8e0; border-radius: 10px; }
 .conference-tab { padding: 8px 16px; color: var(--muted); background: transparent; border: 0; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 800; }
 .conference-tab[aria-selected="true"] { color: var(--ink); background: var(--card); box-shadow: 0 2px 8px rgba(26, 37, 52, .08); }
@@ -347,6 +379,8 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .team > span:not(.team-logo) { display: none; }
   .game-score { min-width: 48px; font-size: 26px; }
   .team-logo { width: 48px; height: 48px; font-size: 9px; }
+  .week-block[open] .game-card { padding: 6px 8px; }
+  .week-block[open] .game-score { font-size: 26px; }
   .team-dialog-header { gap: 12px; padding: 18px; }
   .team-dialog-heading { gap: 11px; }
   .team-dialog-logo .team-logo { width: 48px; height: 48px; }
@@ -380,4 +414,10 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .team-dialog-header .dialog-close { padding: 7px 9px; font-size: 12px; }
   .team-dialog-content { padding: 2px 14px 16px; }
   .team-week { padding: 15px 0 18px; }
+}
+
+@media (max-width: 360px) {
+  .week-block[open] .matchup { grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr); gap: 4px; }
+  .week-block[open] .game-score { min-width: 76px; font-size: 20px; }
+  .week-block[open] .team-logo { width: 34px; height: 34px; }
 }
