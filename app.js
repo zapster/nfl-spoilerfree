@@ -1,5 +1,6 @@
 import { formatWeekDate, gamePresentation } from "./schedule-time.mjs";
 import { recordsBeforeGames } from "./schedule-records.mjs";
+import { streakLabel } from "./standings-streak.mjs";
 import { teamScheduleByWeek } from "./team-schedule.mjs";
 
 const DATA = {
@@ -894,21 +895,6 @@ function winningPercentage(team) {
   return team.gamesPlayed ? (team.wins + 0.5 * team.ties) / team.gamesPlayed : 0;
 }
 
-function streakLabel(team) {
-  if (team.history.length === 0) return "-";
-  const latest = team.history.at(-1).result;
-  if (!latest) return "?";
-
-  let count = 1;
-  let index = team.history.length - 2;
-  while (index >= 0 && team.history[index].result === latest) {
-    count += 1;
-    index -= 1;
-  }
-  if (index >= 0 && team.history[index].result === null) return `${latest}?`;
-  return `${latest}${count}`;
-}
-
 function teamStandingElement(team, index) {
   const row = document.createElement("tr");
   row.dataset.standingTeamAbbr = team.abbreviation;
@@ -949,7 +935,7 @@ function teamStandingElement(team, index) {
   const values = [
     { value: recordLabel(team), className: "record" },
     { value: team.gamesPlayed ? winningPercentage(team).toFixed(3).replace(/^0/, "") : "-" },
-    { value: streakLabel(team), className: team.history.length ? "streak" : "" },
+    { value: streakLabel(team.history), className: team.history.length ? "streak" : "" },
   ];
   values.forEach(({ value, className }) => {
     const cell = document.createElement("td");
@@ -977,7 +963,7 @@ function standingsView() {
       </div>
     </div>
     <div class="division-grid" id="division-grid"></div>
-    <div class="legend"><span class="partial-legend">* Partial record: some results remain hidden</span><span>Basic winning-percentage order</span></div>
+    <div class="legend"><span class="partial-legend">* Partial record: some results remain hidden</span><span>? Streak has hidden results before or after the known run</span><span>Basic winning-percentage order</span></div>
   `;
 
   section.querySelectorAll(".conference-tab").forEach((button) => {

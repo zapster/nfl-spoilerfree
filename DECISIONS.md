@@ -82,14 +82,17 @@ This file records product and implementation decisions for the current app.
   `(wins + 0.5 * ties) / gamesPlayed`.
 - A partial record must be labeled as a known or revealed record, not presented
   as the team's complete actual record.
-- If the latest completed game is unrevealed, show `?` for the streak.
+- If the latest completed game is unrevealed, show the last known streak with a
+  trailing `?`; show `?` alone when every completed result is unrevealed.
 - If the latest result is known but an unrevealed game prevents confirming where
   the streak began, show `W?` or `L?` instead of a numeric streak.
 - Show a numeric streak only when its boundary is known: the preceding game is
   revealed as the opposite result, or the streak reaches the start of the
-  season.
+  season. Add a trailing `?` when newer completed results are unrevealed.
 - For chronological results `? W W`, show `W?`, not `W2`, because the first
   result could extend or break the visible streak.
+- For chronological results `L W W ?`, show `W2?`: the known run is visible,
+  but hidden newer results could extend or break it.
 
 ## Schedule Records
 
