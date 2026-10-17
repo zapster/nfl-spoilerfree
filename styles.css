@@ -429,7 +429,8 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .team-dialog-header .dialog-close { padding: 7px 9px; font-size: 12px; }
   .team-dialog-content { padding: 2px 14px 16px; }
   .week-block[open] .game-card { grid-template-columns: 64px minmax(0, 1fr); gap: 10px; }
-  .week-block[open] .team-logo, .team-games-panel .team-logo { width: 40px; height: 40px; }
+  .team-games-panel .matchup { grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr); gap: 4px; }
+  .team-games-panel .game-score { min-width: 76px; font-size: 22px; }
 }
 
 @media (max-width: 360px) {
@@ -437,6 +438,6 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .week-block[open] .game-score, .team-games-panel .game-score { min-width: 76px; font-size: 20px; }
   .week-block[open] .game-card { grid-template-columns: 56px minmax(0, 1fr); gap: 8px; }
   .week-block[open] .game-time strong { font-size: 10px; }
-  .week-block[open] .team-logo { width: 28px; height: 28px; }
+  .week-block[open] .team-logo { width: 34px; height: 34px; }
   .team-games-panel .team-logo { width: 34px; height: 34px; }
 }
