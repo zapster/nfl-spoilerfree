@@ -1,5 +1,6 @@
 import { formatWeekDate, gamePresentation } from "./schedule-time.mjs";
 import { recordsBeforeGames } from "./schedule-records.mjs";
+import { teamScheduleByWeek } from "./team-schedule.mjs";
 
 const DATA = {
   season: 2025,
@@ -540,6 +541,36 @@ function teamElement(team, record, home = false) {
   return element;
 }
 
+function weekDateElement(weekNumber, games) {
+  const weekDate = document.createElement("span");
+  weekDate.className = "game-week-date";
+  const date = formatWeekDate(games);
+  weekDate.append(document.createTextNode(`Week ${weekNumber}${date ? ` · ${date}` : ""}`));
+  if (weekNumber === state.currentWeek) {
+    const currentMarker = document.createElement("span");
+    currentMarker.className = "current-week";
+    currentMarker.textContent = "Current";
+    weekDate.append(currentMarker);
+  }
+  return weekDate;
+}
+
+function byeWeekElement(weekNumber) {
+  const article = document.createElement("article");
+  article.className = "team-bye-week";
+  article.dataset.week = String(weekNumber);
+
+  const weekDate = document.createElement("div");
+  weekDate.className = "team-bye-week-label";
+  weekDate.append(weekDateElement(weekNumber, []));
+
+  const label = document.createElement("strong");
+  label.className = "team-bye-week-status";
+  label.textContent = "Bye Week";
+  article.append(weekDate, label);
+  return article;
+}
+
 function gameElement(
   game,
   onScoreChange = () => render(),
@@ -559,17 +590,7 @@ function gameElement(
   status.textContent = game.status === "final" ? "Final" : "Scheduled";
   time.append(status);
   if (showWeekDate) {
-    const weekDate = document.createElement("span");
-    weekDate.className = "game-week-date";
-    const date = formatWeekDate([game]);
-    weekDate.append(document.createTextNode(`Week ${game.week}${date ? ` · ${date}` : ""}`));
-    if (game.week === state.currentWeek) {
-      const currentMarker = document.createElement("span");
-      currentMarker.className = "current-week";
-      currentMarker.textContent = "Current";
-      weekDate.append(currentMarker);
-    }
-    time.append(weekDate);
+    time.append(weekDateElement(game.week, [game]));
   } else {
     time.append(
       document.createTextNode(presentation.weekday),
@@ -644,13 +665,13 @@ function openTeamGames(abbreviation, trigger) {
 }
 
 function scrollTeamGamesToCurrent() {
-  const games = [...teamGamesList.querySelectorAll(".team-games-panel .game-card")];
+  const weeks = [...teamGamesList.querySelectorAll(".team-games-panel [data-week]")];
   const targetWeek = state.currentWeek ?? state.focusWeek;
   const target = targetWeek === null
-    ? games[0]
-    : games.find((game) => Number(game.dataset.week) === targetWeek)
-      || games.filter((game) => Number(game.dataset.week) <= targetWeek).at(-1)
-      || games[0];
+    ? weeks[0]
+    : weeks.find((week) => Number(week.dataset.week) === targetWeek)
+      || weeks.filter((week) => Number(week.dataset.week) <= targetWeek).at(-1)
+      || weeks[0];
   if (!target) return;
 
   teamGamesList.scrollTop += target.getBoundingClientRect().top - teamGamesList.getBoundingClientRect().top;
@@ -678,22 +699,23 @@ function renderTeamGames(abbreviation, focusGameId = null) {
     return;
   }
 
-  const weeks = [...new Set(games.map((game) => game.week))].sort((left, right) => left - right);
   const recordsByGame = recordsBeforeGames(state.games, state.revealed);
   const panel = document.createElement("div");
   panel.className = "team-games-panel";
-  weeks.forEach((weekNumber) => {
-    games
-      .filter((game) => game.week === weekNumber)
-      .forEach((game) => {
-        const row = gameElement(
-          game,
-          (gameId) => renderTeamGames(abbreviation, gameId),
-          { showWeekDate: true, recordsByGame },
-        );
-        row.dataset.week = String(weekNumber);
-        panel.append(row);
-      });
+  teamScheduleByWeek(state.games, abbreviation).forEach(({ week, games: weekGames }) => {
+    if (weekGames.length === 0) {
+      panel.append(byeWeekElement(week));
+      return;
+    }
+    weekGames.forEach((game) => {
+      const row = gameElement(
+        game,
+        (gameId) => renderTeamGames(abbreviation, gameId),
+        { showWeekDate: true, recordsByGame },
+      );
+      row.dataset.week = String(week);
+      panel.append(row);
+    });
   });
   teamGamesList.append(panel);
 
