@@ -125,7 +125,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .data-status.is-error { color: #9b3d2c; }
 
 button.team { width: 100%; padding: 0; color: inherit; background: transparent; border: 0; cursor: pointer; text-align: left; }
-button.team:hover > span:not(.team-logo) { text-decoration: underline; text-decoration-color: rgba(24, 33, 47, .35); text-underline-offset: 4px; }
+.team:hover .team-name { text-decoration: underline; text-decoration-color: rgba(24, 33, 47, .35); text-underline-offset: 4px; }
 .team-identity-button { display: flex; align-items: center; flex: 1; gap: 9px; min-width: 0; padding: 0; color: var(--ink); background: transparent; border: 0; cursor: pointer; font: inherit; text-align: left; }
 .team-identity-button:hover .team-name { text-decoration: underline; text-decoration-color: rgba(24, 33, 47, .35); text-underline-offset: 3px; }
 .team-identity-button:focus-visible, button.team:focus-visible { border-radius: 8px; }
@@ -263,7 +263,12 @@ h2 { margin-bottom: 0; font-size: 19px; letter-spacing: -.025em; }
 
 .team { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 27px; font-weight: 750; }
 .team.home { justify-content: flex-end; text-align: right; }
-.team > span:not(.team-logo), .team-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-copy { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.team-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-record { flex: 0 0 auto; color: var(--muted); font-size: 11px; font-weight: 750; line-height: 1.1; letter-spacing: .015em; white-space: nowrap; }
+.team-record.is-partial { color: #8b6b34; }
+.team.home .team-copy { text-align: right; }
+.team.home .team-copy { flex-direction: row-reverse; }
 
 .team-logo {
   position: relative;
@@ -307,6 +312,7 @@ button.game-score:hover { background: #f0ede5; }
 button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-visible { outline: 3px solid rgba(228, 87, 61, .35); outline-offset: 3px; }
 .game-score.is-scheduled { color: var(--muted); }
 .view-note, .legend { margin: 18px 0 0; color: var(--muted); font-size: 12px; }
+.record-note { margin: 7px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
 
 .week-block[open] {
   overflow: hidden;
@@ -338,7 +344,7 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
 
 .week-block[open] .game-card:last-child { border-bottom: 0; }
 .week-block[open] .matchup { grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); }
-.week-block[open] .team, .team-games-panel .team { min-height: 44px; }
+.week-block[open] .team, .team-games-panel .team { min-height: 56px; }
 .week-block[open] .game-score { min-width: 96px; word-spacing: -4px; }
 
 .conference-tabs { display: inline-flex; padding: 4px; background: #ebe8e0; border-radius: 10px; }
@@ -379,17 +385,20 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .game-card { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 16px 14px; }
   .game-time { font-size: 11px; }
   .matchup { grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); gap: 7px; }
-  .team { gap: 6px; font-size: 20px; }
-  .team > span:not(.team-logo) { display: none; }
+  .team { flex-direction: row; justify-content: center; gap: 4px; font-size: 20px; }
+  .team.home { justify-content: center; text-align: center; }
+  .team-copy { gap: 0; }
+  .matchup .team-name { display: none; }
+  .team-record { font-size: 10px; }
   .game-score { min-width: 48px; font-size: 26px; }
   .team-logo { width: 48px; height: 48px; font-size: 9px; }
-  .week-block[open] .game-card { padding: 6px 8px; }
+  .week-block[open] .game-card, .team-games-panel .game-card { padding: 6px 8px; }
+  .week-block[open] .team, .team-games-panel .team { min-height: 0; }
   .week-block[open] .game-score { font-size: 26px; }
   .team-dialog-header { gap: 12px; padding: 18px; }
   .team-dialog-heading { gap: 11px; }
   .team-dialog-logo .team-logo { width: 48px; height: 48px; }
   .team-dialog-content { padding: 4px 18px 22px; }
-  .team-games-panel .game-card { padding: 6px 8px; }
   .team-games-panel .game-score { font-size: 26px; }
   .standings-heading .conference-tabs { display: flex; margin-top: 20px; }
   .conference-tab { flex: 1; }
@@ -419,10 +428,15 @@ button.game-score:focus-visible, .conference-tab:focus-visible, .view-tab:focus-
   .team-dialog-description { max-width: 35ch; font-size: 11px; }
   .team-dialog-header .dialog-close { padding: 7px 9px; font-size: 12px; }
   .team-dialog-content { padding: 2px 14px 16px; }
+  .week-block[open] .game-card { grid-template-columns: 64px minmax(0, 1fr); gap: 10px; }
+  .week-block[open] .team-logo, .team-games-panel .team-logo { width: 40px; height: 40px; }
 }
 
 @media (max-width: 360px) {
   .week-block[open] .matchup, .team-games-panel .matchup { grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr); gap: 4px; }
   .week-block[open] .game-score, .team-games-panel .game-score { min-width: 76px; font-size: 20px; }
-  .week-block[open] .team-logo, .team-games-panel .team-logo { width: 34px; height: 34px; }
+  .week-block[open] .game-card { grid-template-columns: 56px minmax(0, 1fr); gap: 8px; }
+  .week-block[open] .game-time strong { font-size: 10px; }
+  .week-block[open] .team-logo { width: 28px; height: 28px; }
+  .team-games-panel .team-logo { width: 34px; height: 34px; }
 }

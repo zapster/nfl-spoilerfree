@@ -88,6 +88,14 @@ This file records product and implementation decisions for the current app.
 - For chronological results `? W W`, show `W?`, not `W2`, because the first
   result could extend or break the visible streak.
 
+## Schedule Records
+
+- Show each team's W-L record immediately before each game in the schedule and
+  team game dialog. Include only earlier completed results the user has
+  revealed; an asterisk marks a partial record when earlier results are hidden.
+- Do not show a streak in the matchup row, to keep team identities clear on
+  small screens.
+
 ## Data Loading and Caching
 
 - Show a first-use notice describing `localStorage` preferences, the IndexedDB

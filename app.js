@@ -1,4 +1,5 @@
 import { formatWeekDate, gamePresentation } from "./schedule-time.mjs";
+import { recordsBeforeGames } from "./schedule-records.mjs";
 
 const DATA = {
   season: 2025,
@@ -474,28 +475,50 @@ function logoElement(team, size = "large") {
   return logo;
 }
 
-function teamElement(team, home = false) {
+function teamElement(team, record, home = false) {
   const element = document.createElement("button");
   element.type = "button";
   element.className = `team${home ? " home" : ""}`;
   element.dataset.teamAbbr = team.abbreviation;
-  element.setAttribute("aria-label", `View ${team.name} regular-season games`);
+  const recordText = recordLabel(record);
+  const hiddenResultsText = record.hiddenGames === 1
+    ? "1 earlier result is hidden"
+    : `${record.hiddenGames} earlier results are hidden`;
+  element.setAttribute("aria-label", record.hiddenGames
+    ? `View ${team.name} regular-season games. Record before this game: ${recordText}; partial, ${hiddenResultsText}.`
+    : `View ${team.name} regular-season games. Record before this game: ${recordText}.`);
   element.setAttribute("aria-haspopup", "dialog");
   element.setAttribute("aria-controls", "team-dialog");
   element.addEventListener("click", (event) => openTeamGames(team.abbreviation, event.currentTarget));
   const name = document.createElement("span");
+  name.className = "team-name";
   name.textContent = team.nickname;
+  const recordElement = document.createElement("span");
+  recordElement.className = `team-record${record.hiddenGames ? " is-partial" : ""}`;
+  recordElement.textContent = `${recordText}${record.hiddenGames ? "*" : ""}`;
+  recordElement.title = record.hiddenGames
+    ? `${recordText} from revealed games; ${hiddenResultsText}`
+    : `Record before this game: ${recordText}`;
+  recordElement.setAttribute("aria-hidden", "true");
+  const copy = document.createElement("span");
+  copy.className = "team-copy";
+  copy.append(name, recordElement);
   if (home) {
-    element.append(name, logoElement(team));
+    element.append(copy, logoElement(team));
   } else {
-    element.append(logoElement(team), name);
+    element.append(logoElement(team), copy);
   }
   return element;
 }
 
-function gameElement(game, onScoreChange = () => render(), { showWeekDate = false } = {}) {
+function gameElement(
+  game,
+  onScoreChange = () => render(),
+  { showWeekDate = false, recordsByGame } = {},
+) {
   const away = teamFor(game.awayTeam);
   const home = teamFor(game.homeTeam);
+  const gameRecords = recordsByGame.get(game.id);
   const presentation = gamePresentation(game);
   const article = document.createElement("article");
   article.className = "game-card";
@@ -528,7 +551,7 @@ function gameElement(game, onScoreChange = () => render(), { showWeekDate = fals
 
   const matchup = document.createElement("div");
   matchup.className = "matchup";
-  const awayElement = teamElement(away);
+  const awayElement = teamElement(away, gameRecords[game.awayTeam]);
   awayElement.dataset.gameId = game.id;
   matchup.append(awayElement);
 
@@ -565,7 +588,7 @@ function gameElement(game, onScoreChange = () => render(), { showWeekDate = fals
     matchup.append(score);
   }
 
-  const homeElement = teamElement(home, true);
+  const homeElement = teamElement(home, gameRecords[game.homeTeam], true);
   homeElement.dataset.gameId = game.id;
   matchup.append(homeElement);
   article.append(time, matchup);
@@ -623,6 +646,7 @@ function renderTeamGames(abbreviation, focusGameId = null) {
   }
 
   const weeks = [...new Set(games.map((game) => game.week))].sort((left, right) => left - right);
+  const recordsByGame = recordsBeforeGames(state.games, state.revealed);
   const panel = document.createElement("div");
   panel.className = "team-games-panel";
   weeks.forEach((weekNumber) => {
@@ -632,7 +656,7 @@ function renderTeamGames(abbreviation, focusGameId = null) {
         const row = gameElement(
           game,
           (gameId) => renderTeamGames(abbreviation, gameId),
-          { showWeekDate: true },
+          { showWeekDate: true, recordsByGame },
         );
         row.dataset.week = String(weekNumber);
         panel.append(row);
@@ -650,6 +674,7 @@ function renderTeamGames(abbreviation, focusGameId = null) {
 
 function scheduleView() {
   const weeks = [...new Set(state.games.map((game) => game.week))].sort((left, right) => left - right);
+  const recordsByGame = recordsBeforeGames(state.games, state.revealed);
   const completedGames = state.games.filter((game) => game.status === "final");
   const unrevealedGames = completedGames.filter((game) => !state.revealed.has(game.id));
   const allRevealed = completedGames.length > 0 && unrevealedGames.length === 0;
@@ -664,6 +689,7 @@ function scheduleView() {
         <p class="eyebrow">${DATA.season} regular season</p>
         <h1>Schedule</h1>
         <p class="intro">${currentWeekNote}</p>
+        <p class="record-note">Records show revealed results before each game; * marks hidden earlier results.</p>
       </div>
       <div class="schedule-tools">
         <button class="uncover-all season-uncover-all" type="button"></button>
@@ -748,7 +774,7 @@ function scheduleView() {
       render();
     });
     const list = week.querySelector(".games");
-    games.forEach((game) => list.append(gameElement(game)));
+    games.forEach((game) => list.append(gameElement(game, undefined, { recordsByGame })));
     stream.append(week);
   });
   return section;
