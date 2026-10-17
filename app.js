@@ -980,9 +980,9 @@ function standingsView() {
     const card = document.createElement("section");
     card.className = "division";
     card.innerHTML = `
-      <div class="division-heading"><h2></h2><span>W-L</span></div>
+      <div class="division-heading"><h2></h2></div>
       <table class="standings-table">
-        <thead><tr><th scope="col">Team</th><th scope="col">W-L</th><th scope="col">Pct</th><th scope="col">Streak</th></tr></thead>
+        <thead><tr><th scope="col">Team</th><th scope="col">W-L</th><th scope="col">Pct</th><th scope="col" aria-label="Streak"><span class="streak-label-full">Streak</span><span class="streak-label-compact" aria-hidden="true">STRK</span></th></tr></thead>
         <tbody></tbody>
       </table>
     `;
