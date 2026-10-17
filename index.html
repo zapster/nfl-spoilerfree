@@ -109,9 +109,14 @@
             <p class="team-dialog-description" id="team-dialog-description">Regular-season games are listed with their week and date. Pregame records use revealed earlier results; * marks earlier hidden results.</p>
           </div>
         </div>
-        <button class="dialog-close" id="close-team-dialog" type="button" aria-label="Close team games">Close</button>
+        <div class="team-dialog-actions">
+          <button class="dialog-close" id="close-team-dialog" type="button" aria-label="Close team games">Close</button>
+          <button class="team-dialog-standings" id="team-dialog-standings" type="button" hidden></button>
+        </div>
       </header>
-      <div class="team-dialog-content" id="team-games-list"></div>
+      <div class="team-dialog-content">
+        <div class="team-games-list" id="team-games-list"></div>
+      </div>
     </dialog>
   </main>
 

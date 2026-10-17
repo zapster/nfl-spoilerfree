@@ -70,6 +70,9 @@ This file records product and implementation decisions for the current app.
 - Per-game score controls use the same persisted reveal state as the main views.
 - Closing the dialog returns to the originating view, scroll position, and team
   control.
+- The dialog also links to that team's conference division standings, focusing
+  and highlighting the team's row; this is intentional navigation rather than a
+  dialog close that returns to the originating view.
 
 ## Partial-Result Standings
 

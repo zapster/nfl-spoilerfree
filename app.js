@@ -40,6 +40,7 @@ const dataStatus = document.querySelector("#data-status");
 const teamDialog = document.querySelector("#team-dialog");
 const teamDialogLogo = document.querySelector("#team-dialog-logo");
 const teamDialogTitle = document.querySelector("#team-dialog-title");
+const teamDialogStandings = document.querySelector("#team-dialog-standings");
 const teamDialogSeason = document.querySelector("#team-dialog-season");
 const teamGamesList = document.querySelector("#team-games-list");
 
@@ -390,6 +391,34 @@ document.querySelector("#reset-data").addEventListener("click", () => {
 
 document.querySelector("#close-team-dialog").addEventListener("click", () => teamDialog.close());
 
+teamDialogStandings.addEventListener("click", () => {
+  const abbreviation = teamDialogStandings.dataset.teamAbbr;
+  if (!abbreviation) return;
+
+  const team = teamFor(abbreviation);
+  if (!team.conference || !team.division) return;
+
+  returnTeamAbbreviation = null;
+  returnTeamGameId = null;
+  state.view = "standings";
+  state.conference = team.conference;
+  window.history.replaceState(null, "", "#standings");
+  teamDialog.close();
+  render();
+
+  window.requestAnimationFrame(() => {
+    const target = [...content.querySelectorAll("[data-standing-team-abbr]")]
+      .find((row) => row.dataset.standingTeamAbbr === abbreviation);
+    if (!target) return;
+
+    target.classList.add("is-target");
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    target.scrollIntoView({ behavior, block: "center" });
+    target.focus({ preventScroll: true });
+    window.setTimeout(() => target.classList.remove("is-target"), 2400);
+  });
+});
+
 teamDialog.addEventListener("click", (event) => {
   if (event.target === teamDialog) teamDialog.close();
 });
@@ -629,6 +658,10 @@ function scrollTeamGamesToCurrent() {
 
 function renderTeamGames(abbreviation, focusGameId = null) {
   const team = teamFor(abbreviation);
+  teamDialogStandings.dataset.teamAbbr = team.conference && team.division ? abbreviation : "";
+  teamDialogStandings.textContent = `${team.conference} ${team.division}`;
+  teamDialogStandings.setAttribute("aria-label", `View ${team.conference} ${team.division} standings`);
+  teamDialogStandings.hidden = !team.conference || !team.division;
   const games = state.games.filter((game) => game.gameType === "REG"
     && (game.awayTeam === abbreviation || game.homeTeam === abbreviation));
   const scrollTop = teamGamesList.scrollTop;
@@ -856,6 +889,8 @@ function streakLabel(team) {
 
 function teamStandingElement(team, index) {
   const row = document.createElement("tr");
+  row.dataset.standingTeamAbbr = team.abbreviation;
+  row.tabIndex = -1;
   const hasUnrevealedResults = team.history.some(({ result }) => result === null);
   if (hasUnrevealedResults) row.classList.add("has-unrevealed");
   const teamCell = document.createElement("td");
