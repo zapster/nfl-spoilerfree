@@ -64,6 +64,17 @@ dataset is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.
 attribution: **nflverse-data contributors**,
 <https://github.com/nflverse/nflverse-data>.
 
+The nflverse schedule is not a live scoreboard: its schema has no game-status,
+quarter, or clock fields. The [schedule data dictionary](https://nflreadr.nflverse.com/articles/dictionary_schedules.html)
+describes score fields but does not define an in-progress state. Scores can remain
+empty while a game is underway, so the schema does not distinguish an unstarted
+game from an ongoing one. This app marks a game **Final** only when both scores
+are present; if either score is missing, it displays the game as **Scheduled**.
+As a result, an ongoing game may appear scheduled until nflverse publishes its
+scores. nflverse says its [schedule data updates every five minutes](https://nflreadr.nflverse.com/articles/nflverse_data_schedule.html#nflverse-gameschedule-data)
+during the season, but this project's publisher checks for upstream changes
+hourly, and the browser may reuse a cached manifest for up to an hour.
+
 The nflverse schedule data dictionary specifies that `gametime` is a 24-hour
 kickoff time in Eastern Time, regardless of game location. The app interprets
 `gameday` and `gametime` together in `America/New_York`, then displays known
