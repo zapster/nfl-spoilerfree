@@ -3,6 +3,7 @@ import { recordsBeforeGames } from "./schedule-records.mjs";
 import { scheduleWeekTargets } from "./schedule-week.mjs";
 import { streakLabel } from "./standings-streak.mjs";
 import { teamScheduleByWeek } from "./team-schedule.mjs";
+import { sortDivisionStandings } from "./nfl-division-standings.mjs";
 
 const DATA = {
   season: 2025,
@@ -932,7 +933,7 @@ function standingsView() {
       </div>
     </div>
     <div class="division-grid" id="division-grid"></div>
-    <div class="legend"><span class="partial-legend">* Partial record: some results remain hidden</span><span>? Streak has hidden results before or after the known run</span><span>Basic winning-percentage order</span></div>
+    <div class="legend"><span class="partial-legend">* Partial record: some results remain hidden</span><span>? Streak has hidden results before or after the known run</span><span>NFL division tiebreakers use revealed results only</span></div>
   `;
 
   section.querySelectorAll(".conference-tab").forEach((button) => {
@@ -948,12 +949,10 @@ function standingsView() {
     .sort();
   const grid = section.querySelector("#division-grid");
   divisions.forEach((division) => {
-    const teams = [...standings.values()]
-      .filter((team) => team.conference === state.conference && team.division === division)
-      .sort((left, right) => {
-        const pctDifference = winningPercentage(right) - winningPercentage(left);
-        return pctDifference || right.wins - left.wins || left.nickname.localeCompare(right.nickname);
-      });
+    const allTeams = [...standings.values()];
+    const teams = allTeams
+      .filter((team) => team.conference === state.conference && team.division === division);
+    const rankedTeams = sortDivisionStandings(teams, allTeams, state.games, state.revealed);
     const card = document.createElement("section");
     card.className = "division";
     card.innerHTML = `
@@ -965,7 +964,7 @@ function standingsView() {
     `;
     card.querySelector(".division-heading h2").textContent = `${state.conference} ${division}`;
     const body = card.querySelector("tbody");
-    teams.forEach((team, index) => body.append(teamStandingElement(team, index)));
+    rankedTeams.forEach((team, index) => body.append(teamStandingElement(team, index)));
     grid.append(card);
   });
   return section;

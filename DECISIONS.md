@@ -80,6 +80,11 @@ This file records product and implementation decisions for the current app.
 
 - Standings are calculated only from completed games whose results the user has
   revealed.
+- Division standings use the NFL division tiebreaking sequence, calculated only
+  from revealed results. If the available source data cannot distinguish a tie
+  at the final net-touchdown/coin-toss steps, use team-name order as a stable
+  fallback; the published schedule contains final scores but not touchdown
+  counts.
 - Winning percentage gives revealed ties half credit using
   `(wins + 0.5 * ties) / gamesPlayed`.
 - A partial record must be labeled as a known or revealed record, not presented
